@@ -9,7 +9,7 @@ const siteMetadata = {
   siteUrl: 'http://sheddy.xyz',
   siteRepo: 'https://github.com/hacktivist123/sheddy-xyz-new',
   siteLogo: '/static/images/logo.png',
-  socialBanner: '/static/images/twitter-card.png',
+  socialBanner: '/static/images/social-card.png',
   github: 'https://github.com/hacktivist123',
   twitter: 'https://twitter.com/coder_blvck',
   youtube: 'https://www.youtube.com/channel/UCUnHbLI4hUJzmCEw_66YaFg',
