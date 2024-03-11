@@ -3,7 +3,7 @@ const siteMetadata = {
   title: "Shedrack's Blog",
   author: 'Shedrack Akintayo',
   headerTitle: 'Shedrack Akintayo',
-  description: 'A blog for byte-sized ariticles on things that interest me',
+  description: 'A blog for byte-sized articles on things that interest me',
   language: 'en-us',
   theme: 'system', // system, dark or light
   siteUrl: 'http://sheddy.xyz',
