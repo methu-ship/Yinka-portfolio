@@ -123,7 +123,7 @@ source: [Kubernetes.io](https://kubernetes.io/docs/concepts/services-networking/
 How do we replicate this network policy but with CIlium? We can do this with the use of [CiliumNetworkPolicy](https://docs.cilium.io/en/latest/network/kubernetes/policy/#ciliumnetworkpolicy)
 
 ### CiliumNetworkPolicy
-According to Cilium's official documentation, the `CiliumNetworkPolicy` is similar to the standard NetworkPolicy. The purpose is to provide functionality which is not yet supported in NetworkPolicy. Cilium supports the specification of policies at Layers 3-7 for both ingress and egress.
+According to Cilium's official documentation, the `CiliumNetworkPolicy` is similar to the standard NetworkPolicy. The purpose is to provide functionality which is not yet supported in NetworkPolicy. Cilium supports the specification of policies at Layers 3-7 for both [ingress](https://kubernetes.io/docs/concepts/services-networking/ingress/) and [egress](https://www.tkng.io/ingress/egress/).
 
 ### CiliumNetworkPolicy Labels
 Layer 3 policies can be specified based on the following:
