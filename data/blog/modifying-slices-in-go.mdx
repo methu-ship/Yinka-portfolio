@@ -11,7 +11,7 @@ tags:
 
 When you pass a variable to a function, it is always passed by value, meaning a copy is made. Therefore, any changes made to the variable within the function will not affect the original variable. To modify the original variable in Go, you need to pass a pointer to it.
 
-Pointers are variables that store the memory address of another variable. They enable you to reference and manipulate the value stored at that address directly, allowing for more efficient memory usage and the ability to modify variables and data structures indirectly.
+Pointers are variables that store the memory address of another variable. They enable you to reference and manipulate the value stored at that address. This allows for more efficient memory usage and the ability to modify the values of variables and data structures that are located elsewhere in memory, typically in another scope or function.
 
 > The term "indirectly" emphasizes that the modification is done through a reference to the variable's memory address rather than by the variable's name directly. 
 
