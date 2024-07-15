@@ -1,5 +1,5 @@
 ---
-title: Modifying Slices In Go
+title: Understanding Slice Modification in Go: Pointers vs. append()
 draft: false
 date: 2024-07-15
 summary: "A short note on Modifying Slices with Pointers and Slices in Go"
@@ -55,7 +55,7 @@ a: another string
 
 So if you pass a variable to a function in Go and you don’t need to change it, you can just pass it by value, which creates a copy of the original variable.
 
-Slices, Maps, and Channels in Go all behave like pointers by default.
+Slices, Maps, and Channels in Go somewhat behave like pointers by default.
 
 
 ## Slices, Pointers and The append() Function
@@ -131,5 +131,11 @@ The output of the above code would also be:
 Before function call: [1 2 3]
 After function call: [1 2 3 4]
 ```
+
+### Things To Keep in Mind
+
+- While slices are indeed passed by value, this value is a reference to the underlying array. This means that modifications to the slice's contents within a function will be visible outside the function, even without using pointers.
+- Using pointers to slices is mainly necessary when you need to modify the slice header itself (length, capacity, or the pointer to the underlying array) rather than just its contents.
+- For small slices, passing by value can sometimes be more efficient than using pointers, as it avoids an extra layer of indirection.
 
 In conclusion, the `append()` function is a powerful tool for working with slices, but it does not replace the concept of pointers. It leverages the reference nature of slices to manage memory efficiently while allowing flexible and dynamic modification of slice contents.
