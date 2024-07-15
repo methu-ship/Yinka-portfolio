@@ -132,7 +132,7 @@ Before function call: [1 2 3]
 After function call: [1 2 3 4]
 ```
 
-### Things To Keep in Mind
+### Things To Keep In Mind
 
 - While slices are indeed passed by value, this value is a reference to the underlying array. This means that modifications to the slice's contents within a function will be visible outside the function, even without using pointers.
 - Using pointers to slices is mainly necessary when you need to modify the slice header itself (length, capacity, or the pointer to the underlying array) rather than just its contents.
