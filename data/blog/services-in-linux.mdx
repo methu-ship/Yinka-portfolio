@@ -61,7 +61,7 @@ ExecStartPost=<Command to run after starting the program>
 Restart=always # will restart the service if it crashes
 
 [Install] # useful for allowing service to start at boot
-WantedBy=multi-user.target \#service will root at boot after this service starts
+WantedBy=multi-user.target
 ```    
 
 Now, run the following command to reload the system
