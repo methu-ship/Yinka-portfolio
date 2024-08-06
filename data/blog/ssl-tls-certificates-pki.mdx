@@ -82,10 +82,10 @@ Understanding PKI is crucial because it forms the foundation of trust for many i
 
 The verification of certificates obtained from Certificate Authorities (CAs) is a crucial part of the PKI trust model. Here's how it works:
 
-#### Root of Trust:
+#### Root of Trust
 Operating systems and web browsers come pre-installed with a list of trusted root CA certificates. These are the ultimate anchors of trust in the PKI system.
 
-#### Certificate Chain:
+#### Certificate Chain
 When a server presents its certificate to a client (like a web browser), it typically sends a chain of certificates:
 - The server's certificate
 - One or more intermediate CA certificates
@@ -98,7 +98,7 @@ The client (e.g., a web browser) performs several checks:
 - Ensures none of the certificates have expired
 - Checks that none of the certificates have been revoked
 
-#### Certificate Revocation Checks:
+#### Certificate Revocation Checks
 - Clients can check if a certificate has been revoked using:
 - Certificate Revocation Lists (CRLs)
 - Online Certificate Status Protocol (OCSP)
