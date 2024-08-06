@@ -78,6 +78,37 @@ Key components of PKI include:
    
 Understanding PKI is crucial because it forms the foundation of trust for many internet security protocols, including HTTPS, secure email, and digital signatures.
 
+### How Does The PKI Handle Verification of Certificates
+
+The verification of certificates obtained from Certificate Authorities (CAs) is a crucial part of the PKI trust model. Here's how it works:
+
+#### Root of Trust:
+Operating systems and web browsers come pre-installed with a list of trusted root CA certificates. These are the ultimate anchors of trust in the PKI system.
+
+#### Certificate Chain:
+When a server presents its certificate to a client (like a web browser), it typically sends a chain of certificates:
+- The server's certificate
+- One or more intermediate CA certificates
+- The chain should lead up to a trusted root CA
+
+#### Client-side Verification
+The client (e.g., a web browser) performs several checks:
+- Verifies the digital signature of each certificate in the chain
+- Checks that the chain leads to a trusted root CA
+- Ensures none of the certificates have expired
+- Checks that none of the certificates have been revoked
+
+#### Certificate Revocation Checks:
+- Clients can check if a certificate has been revoked using:
+- Certificate Revocation Lists (CRLs)
+- Online Certificate Status Protocol (OCSP)
+
+#### Additional Checks
+- Hostname verification: Ensures the certificate is issued for the domain being accessed
+- Key usage: Verifies the certificate is being used for its intended purpose
+
+The server doesn't just "trust" the cert from the CA. Instead, the entire PKI system is designed so that clients can independently verify the authenticity and validity of certificates.
+
 ## Practical Implications for Developers and System Administrators
 The implications of SSL/TLS and PKI extend far beyond theoretical security. They have tangible impacts on development practices, system administration, and user experience:
 
