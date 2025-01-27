@@ -9,11 +9,13 @@ tags: ['Git']
 
 
 
-You can ammend a remote commit with a file change in your local repo by running this command:
+You can ammend a remote commit with a file change in your local repository by running this command:
 
 ```bash
 
-git --no-pager add <local-file-you-want-to-add-to-a-commit> && git --no-pager commit --fixup=<commit-hash-you-want-to update> && git --no-pager rebase -i --autosquash <commit-hash>
+git --no-pager add <local-file-you-want-to-add-to-a-commit> && \ 
+git --no-pager commit --fixup=<commit-hash-you-want-to update> && \ 
+git --no-pager rebase -i --autosquash <commit-hash> 
 
 ```
 

@@ -1,8 +1,8 @@
 interface Project {
-  title: string,
-  description: string,
-  href?: string,
-  imgSrc?: string,
+  title: string
+  description: string
+  href?: string
+  imgSrc?: string
 }
 
 const projectsData: Project[] = [
@@ -11,6 +11,12 @@ const projectsData: Project[] = [
     description: `goignore is a lightweight Command Line Interface (CLI) tool for generating .gitignore files based on the programming language you're using. It helps you easily create .gitignore files for your projects by either specifying a programming language or automatically detecting it from the files in your project directory.`,
     imgSrc: '/static/images/goignore.png',
     href: 'https://github.com/hacktivist123/goignore',
+  },
+  {
+    title: 'Kpeek',
+    description: `kpeek is a command-line tool that aggregates describe output, container logs, and (optionally) events for a given Kubernetes resource. It simplifies debugging and provides a clean, colorized, human-readable report.`,
+    imgSrc: '/static/images/kpeek.png',
+    href: 'https://github.com/hacktivist123/kpeek',
   },
   {
     title: 'DevOps Learning Plan',
