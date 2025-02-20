@@ -4,8 +4,14 @@ import CardSmall from '@/components/CardSmall'
 import CardSeeAll from '@/components/CardSeeAll'
 import projectsData from '@/data/projectsData'
 
+interface Post {
+  slug: string
+  title: string
+  summary: string
+}
+
 interface LandingPageProps {
-  posts: any[] // Adjust type as needed
+  posts: Post[]
 }
 
 const LandingPage = ({ posts }: LandingPageProps) => {
