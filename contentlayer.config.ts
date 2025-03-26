@@ -134,6 +134,7 @@ export default makeSource({
   mdx: {
     cwd: process.cwd(),
     remarkPlugins: [
+      // @ts-expect-error
       remarkExtractFrontmatter,
       remarkGfm,
       remarkCodeTitles,
