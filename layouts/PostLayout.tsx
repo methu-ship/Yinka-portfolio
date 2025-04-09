@@ -9,10 +9,10 @@ import Image from '@/components/Image'
 import Tag from '@/components/Tag'
 import siteMetadata from '@/data/siteMetadata'
 import ScrollTopAndComment from '@/components/ScrollTopAndComment'
+import ScrollProgressBar from '@/components/ScrollProgressBar'
+import FloatingTOC from '@/components/FloatingTOC'
 
 const editUrl = (path) => `${siteMetadata.siteRepo}/blob/main/data/${path}`
-const discussUrl = (path) =>
-  `https://mobile.twitter.com/search?q=${encodeURIComponent(`${siteMetadata.siteUrl}/${path}`)}`
 
 const postDateTemplate: Intl.DateTimeFormatOptions = {
   weekday: 'long',
@@ -21,20 +21,51 @@ const postDateTemplate: Intl.DateTimeFormatOptions = {
   day: 'numeric',
 }
 
+interface TocItem {
+  value: string
+  url: string
+  depth: number
+  id: string
+  level: 1 | 2
+}
+
 interface LayoutProps {
   content: CoreContent<Blog>
   authorDetails: CoreContent<Authors>[]
   next?: { path: string; title: string }
   prev?: { path: string; title: string }
   children: ReactNode
+  toc: TocItem[]
 }
 
-export default function PostLayout({ content, authorDetails, next, prev, children }: LayoutProps) {
+export default function PostLayout({
+  content,
+  authorDetails,
+  next,
+  prev,
+  children,
+  toc,
+}: LayoutProps) {
   const { filePath, path, slug, date, title, tags } = content
   const basePath = path.split('/')[0]
 
+  const discussUrl = (path) =>
+    `https://twitter.com/intent/tweet?text=${encodeURIComponent(title)}&url=${encodeURIComponent(
+      `${siteMetadata.siteUrl}/${path}`
+    )}&via=coder_blvck`
+
+  const tocLinks = Array.isArray(toc)
+    ? toc.map((item) => ({
+        title: item.value,
+        id: item.url.substring(1),
+        level: (item.depth === 1 ? 1 : 2) as 1 | 2,
+      }))
+    : []
+
   return (
     <SectionContainer>
+      {tocLinks.length > 0 && <FloatingTOC links={tocLinks} />}
+      <ScrollProgressBar />
       <ScrollTopAndComment />
       <article>
         <div className="xl:divide-y xl:divide-gray-200 xl:dark:divide-gray-700">
@@ -95,7 +126,7 @@ export default function PostLayout({ content, authorDetails, next, prev, childre
               <div className="prose max-w-none pb-8 pt-10 dark:prose-invert">{children}</div>
               <div className="pb-6 pt-6 text-sm text-gray-700 dark:text-gray-300">
                 <Link href={discussUrl(path)} rel="nofollow">
-                  Discuss on Twitter
+                  Share on Twitter
                 </Link>
                 {` • `}
                 <Link href={editUrl(filePath)}>View on GitHub</Link>

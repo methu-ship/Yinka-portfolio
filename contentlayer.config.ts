@@ -4,7 +4,6 @@ import readingTime from 'reading-time'
 import { slug } from 'github-slugger'
 import path from 'path'
 // Remark packages
-import remarkGfm from 'remark-gfm'
 import remarkMath from 'remark-math'
 import {
   remarkExtractFrontmatter,
@@ -19,6 +18,7 @@ import rehypeKatex from 'rehype-katex'
 import rehypeCitation from 'rehype-citation'
 import rehypePrismPlus from 'rehype-prism-plus'
 import rehypePresetMinify from 'rehype-preset-minify'
+import rehypeToc from 'rehype-toc'
 import siteMetadata from './data/siteMetadata'
 import { allCoreContent, sortPosts } from 'pliny/utils/contentlayer.js'
 
@@ -29,7 +29,7 @@ const computedFields: ComputedFields = {
   readingTime: { type: 'json', resolve: (doc) => readingTime(doc.body.raw) },
   slug: {
     type: 'string',
-    resolve: (doc) => doc._raw.flattenedPath.replace(/^.+?(\/)/, ''),
+    resolve: (doc) => doc._raw.flattenedPath.replace(/^.+?(\/|$)/, ''),
   },
   path: {
     type: 'string',
@@ -39,7 +39,7 @@ const computedFields: ComputedFields = {
     type: 'string',
     resolve: (doc) => doc._raw.sourceFilePath,
   },
-  toc: { type: 'string', resolve: (doc) => extractTocHeadings(doc.body.raw) },
+  toc: { type: 'json', resolve: (doc) => extractTocHeadings(doc.body.raw) },
 }
 
 /**
@@ -60,19 +60,6 @@ function createTagCount(allBlogs) {
     }
   })
   writeFileSync('./app/tag-data.json', JSON.stringify(tagCount))
-}
-
-function createSearchIndex(allBlogs) {
-  if (
-    siteMetadata?.search?.provider === 'kbar' &&
-    siteMetadata.search.kbarConfig.searchDocumentsPath
-  ) {
-    writeFileSync(
-      `public/${siteMetadata.search.kbarConfig.searchDocumentsPath}`,
-      JSON.stringify(allCoreContent(sortPosts(allBlogs)))
-    )
-    console.log('Local search index generated...')
-  }
 }
 
 export const Blog = defineDocumentType(() => ({
@@ -136,7 +123,6 @@ export default makeSource({
     remarkPlugins: [
       // @ts-expect-error
       remarkExtractFrontmatter,
-      remarkGfm,
       remarkCodeTitles,
       remarkMath,
       remarkImgToJsx,
@@ -144,6 +130,16 @@ export default makeSource({
     rehypePlugins: [
       rehypeSlug,
       rehypeAutolinkHeadings,
+      [
+        rehypeToc,
+        {
+          headings: ['h1', 'h2'],
+          cssClasses: {
+            toc: 'toc-container',
+            link: 'toc-link',
+          },
+        },
+      ],
       rehypeKatex,
       [rehypeCitation, { path: path.join(root, 'data') }],
       [rehypePrismPlus, { defaultLanguage: 'js', ignoreMissing: true }],
@@ -153,6 +149,5 @@ export default makeSource({
   onSuccess: async (importData) => {
     const { allBlogs } = await importData()
     createTagCount(allBlogs)
-    createSearchIndex(allBlogs)
   },
 })
