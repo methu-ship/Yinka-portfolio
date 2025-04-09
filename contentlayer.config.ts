@@ -18,9 +18,7 @@ import rehypeKatex from 'rehype-katex'
 import rehypeCitation from 'rehype-citation'
 import rehypePrismPlus from 'rehype-prism-plus'
 import rehypePresetMinify from 'rehype-preset-minify'
-import rehypeToc from 'rehype-toc'
 import siteMetadata from './data/siteMetadata'
-import { allCoreContent, sortPosts } from 'pliny/utils/contentlayer.js'
 
 const root = process.cwd()
 const isProduction = process.env.NODE_ENV === 'production'
@@ -130,16 +128,6 @@ export default makeSource({
     rehypePlugins: [
       rehypeSlug,
       rehypeAutolinkHeadings,
-      [
-        rehypeToc,
-        {
-          headings: ['h1', 'h2'],
-          cssClasses: {
-            toc: 'toc-container',
-            link: 'toc-link',
-          },
-        },
-      ],
       rehypeKatex,
       [rehypeCitation, { path: path.join(root, 'data') }],
       [rehypePrismPlus, { defaultLanguage: 'js', ignoreMissing: true }],
