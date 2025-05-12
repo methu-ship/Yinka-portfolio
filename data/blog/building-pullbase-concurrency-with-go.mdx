@@ -30,28 +30,9 @@ Instead of storing a context within the `Monitor` struct for its entire lifetime
 ```go
 // Monitor handles cloning/pulling Git repositories and updating target commit hashes.
 type Monitor struct {
-	db           *sqlx.DB
-	repo         database.GitMonitorRepository
-	pollInterval time.Duration
-	clonePath    string
-	mu           sync.RWMutex
-	serverRepos  map[string]*git.Repository
-	mainCancel   context.CancelFunc // Function to cancel the main context used by the polling loop
-	repoLocks    map[string]*sync.Mutex // Per-repository locks for concurrent checks
-}
-
-// NewMonitor creates a new GitMonitor.
-func NewMonitor(db *sqlx.DB, repo database.GitMonitorRepository, pollInterval time.Duration, clonePath string) (*Monitor, error) {
-
-	return &Monitor{
-		db:           db,
-		repo:         repo,
-		pollInterval: pollInterval,
-		clonePath:    clonePath,
-		serverRepos:  make(map[string]*git.Repository),
-		repoLocks:    make(map[string]*sync.Mutex),
-		// mainCancel is intentionally nil until Start() is called
-	}, nil
+    pollInterval time.Duration
+    /* … other fields … */
+    mainCancel context.CancelFunc   // root cancel
 }
 ```
 
@@ -66,46 +47,16 @@ The `Start` method is responsible for setting up the context for the background 
 ```go
 // Start initializes the monitor and begins the polling loop.
 func (m *Monitor) Start() error {
-	if m.repo == nil {
-		return fmt.Errorf("monitor repository is not initialized")
-	}
-	m.mu.Lock()
-	if m.mainCancel != nil {
-		m.mu.Unlock()
-		return fmt.Errorf("monitor already started")
-	}
+    if m.mainCancel != nil { return fmt.Errorf("already started") }
 
-	// Create a new cancellable context for this run.
-	ctx, cancel := context.WithCancel(context.Background())
-	// Store the cancel function for later use by Stop().
-	m.mainCancel = cancel
-	m.mu.Unlock() // Unlock before potentially long-running loadAllServers
+    ctx, cancel := context.WithCancel(context.Background())
+    m.mainCancel = cancel          // store for Stop()
 
-	log.Println("Git monitor starting...")
-
-	// Perform initial server loading; pass the newly created context.
-	if err := m.loadAllServers(ctx); err != nil {
-		// Handle potential cancellation during startup
-		if ctx.Err() != nil {
-			log.Printf("Git monitor startup cancelled during initial server load: %v", ctx.Err())
-			// Clean up the cancel function if startup failed due to cancellation
-			m.mu.Lock()
-			if m.mainCancel != nil {
-				m.mainCancel()
-				m.mainCancel = nil
-			}
-			m.mu.Unlock()
-			return fmt.Errorf("failed to load initial servers due to cancellation: %w", err)
-		}
-		// Log non-cancellation errors but continue startup
-		log.Printf("Warning: Failed to load initial servers: %v", err)
-	}
-
-	// Launch the polling loop in a separate goroutine, passing the context.
-	go m.runPollingLoop(ctx)
-
-	log.Println("Git monitor started successfully.")
-	return nil
+    if err := m.loadAllServers(ctx); err != nil {
+        /* handle startup error or cancellation */
+    }
+    go m.runPollingLoop(ctx)       // background work
+    return nil
 }
 ```
 
@@ -141,42 +92,20 @@ The heart of our `GitMonitor` is the `runPollingLoop`. It uses the context passe
 // runPollingLoop periodically checks all registered Git repositories.
 // It accepts the main context for cancellation.
 func (m *Monitor) runPollingLoop(ctx context.Context) {
-	log.Printf("Starting Git polling loop with interval: %v", m.pollInterval)
+    timer := time.NewTimer(m.pollInterval)
+    defer timer.Stop()
 
-	// Perform an initial check immediately after starting.
-	log.Println("Performing initial repository check...")
-	// Check if context is already cancelled before the first check.
-	if ctx.Err() == nil {
-		if err := m.checkAllRepositories(ctx); err != nil {
-			log.Printf("Error during initial repository check: %v", err)
-		}
-	} else {
-		log.Printf("Monitor context cancelled before initial repository check.")
-		return // Exit if cancelled before starting the loop.
-	}
+    _ = m.checkAllRepositories(ctx) // first pass
 
-	// Initialize a timer for the polling interval.
-	timer := time.NewTimer(m.pollInterval)
-	// Ensure the timer is stopped when the function exits (e.g., on context cancellation).
-	defer timer.Stop()
-
-	for {
-		select {
-		case <-ctx.Done(): // Listen for cancellation signal from the main context.
-			log.Println("Monitor context cancelled, stopping poll loop.")
-			return // Exit the goroutine.
-		case <-timer.C: // Wait for the timer to fire.
-			log.Println("Polling repositories...")
-			// Pass the main context down to the checking function.
-			if err := m.checkAllRepositories(ctx); err != nil {
-				log.Printf("Error checking repositories: %v", err)
-				// Note: Non-fatal errors don't stop the loop.
-			}
-			// Reset the timer for the next interval after the check completes.
-			// This ensures checks don't queue up if they take longer than the interval.
-			timer.Reset(m.pollInterval)
-		}
-	}
+    for {
+        select {
+        case <-ctx.Done():          // Stop() called
+            return
+        case <-timer.C:             // next tick
+            _ = m.checkAllRepositories(ctx)
+            timer.Reset(m.pollInterval)
+        }
+    }
 }
 ```
 
@@ -217,8 +146,6 @@ if err := httpServer.Shutdown(shutdownCtx); err != nil {
 // Stop Git monitor if enabled by calling its Stop method.
 if cfg.Git.Enabled && gitMonitor != nil {
 	gitMonitor.Stop() // This calls mainCancel inside the monitor.
-	// Note: We might want to wait briefly here or have Stop() be blocking
-	// if we need to ensure the polling loop fully exits before main returns.
 }
 
 log.Println("INFO: Server gracefully stopped")
@@ -233,82 +160,39 @@ The context created in `Start` is passed down through `runPollingLoop` to `check
 ```go
 // checkAllRepositories iterates through all monitored servers and checks their repositories.
 func (m *Monitor) checkAllRepositories(ctx context.Context) error {
-	m.mu.RLock() // Read lock to safely copy repo info
-	serverCount := len(m.serverRepos)
-	serverNames := make([]string, 0, serverCount)
-	reposToProcess := make([]*git.Repository, 0, serverCount)
-	locksToUse := make([]*sync.Mutex, 0, serverCount)
-	for name, repo := range m.serverRepos {
-		lock, ok := m.repoLocks[name]
-		if !ok {
-			log.Printf("Warning: Lock for server %s not found during checkAllRepositories setup. Skipping.", name)
-			continue
+	// 1. Snapshot shared maps under read-lock.
+	m.mu.RLock()
+	names, repos, locks := make([]string, 0, len(m.serverRepos)),
+		make([]*git.Repository, 0, len(m.serverRepos)),
+		make([]*sync.Mutex, 0, len(m.serverRepos))
+	for n, r := range m.serverRepos {
+		if l, ok := m.repoLocks[n]; ok {
+			names, repos, locks = append(names, n), append(repos, r), append(locks, l)
 		}
-		serverNames = append(serverNames, name)
-		reposToProcess = append(reposToProcess, repo)
-		locksToUse = append(locksToUse, lock)
 	}
-	m.mu.RUnlock() // Release lock before starting concurrent work
+	m.mu.RUnlock()
 
-	if len(serverNames) == 0 {
-		log.Println("No servers available or locks found for repository checking.")
-		return nil
-	}
-
-	// Create an errgroup with the parent context.
+	// 2. Bounded, cancellable workers.
 	g, gCtx := errgroup.WithContext(ctx)
-	// Limit concurrency to the number of CPU cores.
-	limit := runtime.NumCPU()
-	if limit < 1 {
-		limit = 1
-	}
-	g.SetLimit(limit)
+	g.SetLimit(runtime.NumCPU())
 
-	// Launch a goroutine for each repository check within the errgroup.
-	for i, currentName := range serverNames {
-		// Capture loop variables correctly for the goroutine.
-		name := currentName
-		repo := reposToProcess[i]
-		repoLock := locksToUse[i]
+	for i, name := range names {
+		repo, lock := repos[i], locks[i]
 
 		g.Go(func() error {
-			// Check if the group's context is cancelled before starting work.
-			select {
+			select { // bail early if parent ctx cancelled
 			case <-gCtx.Done():
-				log.Printf("Skipping check for %s due to group context cancellation: %v", name, gCtx.Err())
-				return gCtx.Err() // Return context error to the group.
+				return gCtx.Err()
 			default:
 			}
 
-			// Acquire the specific lock for this repository.
-			repoLock.Lock()
-			defer repoLock.Unlock()
+			lock.Lock()
+			defer lock.Unlock()
 
-			// Pass the group's context down to the individual check function.
-			// This allows checkRepository to also react to cancellation.
-			if err := m.checkRepository(gCtx, name, repo); err != nil {
-				log.Printf("Error detail in errgroup worker for %s: %v", name, err)
-				// Return a wrapped error to the errgroup.
-				return fmt.Errorf("server %s check failed: %w", name, err)
-			}
-			return nil // Success for this worker.
+			return m.checkRepository(gCtx, name, repo)
 		})
 	}
-
-	// Wait for all goroutines in the group to complete and collect the first error.
-	if err := g.Wait(); err != nil {
-		// Log cancellation/timeout specifically.
-		if errors.Is(err, context.Canceled) || errors.Is(err, context.DeadlineExceeded) {
-			log.Printf("checkAllRepositories cancelled or timed out: %v", err)
-		} else {
-			log.Printf("checkAllRepositories completed with errors: %v", err)
-		}
-		// Propagate the error.
-		return fmt.Errorf("one or more repository checks failed during checkAllRepositories: %w", err)
-	}
-
-	log.Println("Finished checking all repositories successfully.")
-	return nil
+	return g.Wait()
 }
 ```
 
@@ -316,39 +200,25 @@ This demonstrates how context is propagated and used effectively with `errgroup`
 
 ## Timeouts for Specific Operations
 
-While the main polling loop uses context primarily for cancellation signals, Pull Base uses `context.WithTimeout` for specific, potentially long-running operations like Git commands. This prevents individual operations from hanging indefinitely.
+While the main polling loop uses context primarily for cancellation signals, Pull Base uses `context.WithTimeout` for specific, potentially long-running operations like Git commands. This prevents individual operations from hanging indefinitely:
 
 ```go
+// checkAllRepositories iterates through all monitored servers and checks their repositories.
 func (m *Monitor) checkRepository(ctx context.Context, serverName string, repo *git.Repository) error {
-	// ... (initial context check) ...
 
-	log.Printf("Fetching remote for %s...", serverName)
-	fetchOpts := &git.FetchOptions{ /* ... options ... */ }
+// ... (rest of the check logic) ...
 
 	// Create a derived context with a specific timeout for the Git fetch operation.
-	fetchCtx, cancel := context.WithTimeout(ctx, gitOperationTimeout)
-	defer cancel() // IMPORTANT: Always call cancel for timeout contexts.
+fetchCtx, cancel := context.WithTimeout(ctx, 1*time.Minute)
+defer cancel()
 
-	// Perform the fetch using the derived context.
-	err := repo.FetchContext(fetchCtx, fetchOpts)
-
-	if err != nil && err != git.NoErrAlreadyUpToDate {
-		// Check specifically if the timeout was exceeded.
-		if fetchCtx.Err() == context.DeadlineExceeded {
-			return fmt.Errorf("failed to fetch remote for %s: operation timed out after %v: %w", serverName, gitOperationTimeout, err)
-		}
-		// Check if the parent context (passed into checkRepository) was cancelled.
-		select {
-		case <-ctx.Done():
-			log.Printf("Fetch cancelled for %s by parent context: %v", serverName, ctx.Err())
-			return ctx.Err() // Propagate parent cancellation.
-		default:
-			// Handle other Git fetch errors.
-			return fmt.Errorf("failed to fetch remote for %s: %w", serverName, err)
-		}
-	}
-	// ... (rest of the check logic, also checking ctx.Done() periodically) ...
-	return nil
+if err := repo.FetchContext(fetchCtx, opts); err != nil {
+    if fetchCtx.Err() == context.DeadlineExceeded {
+        return fmt.Errorf("git fetch timed out: %w", err)
+    }
+    return err
+}
+// ... rest of the check logic ...
 }
 ```
 This selective use of timeouts adds resilience against external dependencies like the network or Git operations, while the main context handles the overall lifecycle cancellation.
