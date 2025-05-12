@@ -1,0 +1,187 @@
+---
+title: "Building Pull Base: Elegant Concurrency with Go's Context System"
+draft: false
+date: '2025-05-12'
+summary: "Let's examine how PullBase implements context-based concurrency management in its GitMonitor component, and how this pattern can be applied to your own Go applications."
+tags: ['Go']    
+---
+
+Go's concurrency model is a key reason many developers choose the language for systems programming. In Pull Base, I've leveraged Go's context package extensively to create a robust concurrency pattern for our long-running operations. This approach ensures our application can gracefully handle shutdowns, timeouts, and cancellations.
+
+Let's examine how [Pull Base](https://pullbase.io) implements context-based concurrency management in its `GitMonitor` component, and how this pattern can be applied to your own Go applications.
+
+## The Problem: Managing Long-Running Operations
+
+When building server applications, you'll often need background processes that run continuously. Consider these challenges:
+
+- How do you cleanly shut down these processes when the application stops?
+- How do you prevent resource leaks during abnormal termination?
+- How do you coordinate the cancellation of multiple related operations?
+
+Traditional solutions like global variables and boolean flags quickly become unwieldy. Go's context package provides a more elegant solution, and we've implemented it systematically throughout Pull Base.
+
+## The Context-Driven Design Pattern
+
+In the core of Pull Base, the `GitMonitor` component exemplifies this pattern. The `GitMonitor` component watches multiple Git repositories, periodically checking for changes and updating server states accordingly.
+
+First, let's look at how we create and store the context:
+
+```go
+// Monitor watches Git repositories for changes and updates target state
+type Monitor struct {
+    db            *sqlx.DB
+    repo          *database.Repository
+    interval      time.Duration
+    baseClonePath string
+    mu            sync.Mutex
+    watchMap      map[string]*repoWatcher
+    ctx           context.Context  // Cancellable context
+    cancel        context.CancelFunc // Function to trigger cancellation
+}
+
+// NewMonitor creates a new Git monitor
+func NewMonitor(db *sqlx.DB, repo *database.Repository, interval time.Duration, clonePath string) (*Monitor, error) {
+    // ...setup code...
+    
+    // Create a cancellable context
+    ctx, cancel := context.WithCancel(context.Background())
+
+    return &Monitor{
+        // ...other fields...
+        ctx:           ctx,
+        cancel:        cancel,
+    }, nil
+}
+```
+
+The `Monitor` struct contains a context and its cancel function. During initialization, we create a cancellable context that will control the lifecycle of all operations within the monitor.
+
+## The Polling Loop Pattern
+
+The heart of our `GitMonitor` is a polling loop that periodically checks repositories for changes. We implement this with a clean select pattern to handle both timer events and cancellation:
+
+```go
+// runPollingLoop periodically checks all repositories for changes
+func (m *Monitor) runPollingLoop() {
+    ticker := time.NewTicker(m.interval)
+    defer ticker.Stop()
+
+    log.Printf("Git monitor polling loop started with interval %v", m.interval)
+
+    for {
+        select {
+        case <-m.ctx.Done():
+            log.Println("Git monitor polling loop stopped: context done")
+            return
+        case <-ticker.C:
+            m.checkAllRepositories()
+        }
+    }
+}
+```
+
+This pattern provides several key benefits:
+
+- The loop automatically terminates when the context is cancelled
+- Resources (the ticker) are properly cleaned up via `defer`
+- The code clearly communicates both the timer-driven and cancellation behaviors
+
+## Graceful Shutdown Handling
+
+When the application receives a termination signal, we implement clean shutdown logic:
+
+```go
+// Stop halts all Git monitoring
+func (m *Monitor) Stop() {
+    m.cancel()
+    log.Println("Git monitor stopped")
+}
+```
+
+In the main application, we tie this into OS signal handling:
+
+```go
+stopChan := make(chan os.Signal, 1)
+signal.Notify(stopChan, syscall.SIGINT, syscall.SIGTERM)
+
+// Wait for interrupt signal
+<-stopChan
+log.Println("INFO: Shutting down server...")
+
+// Setup graceful shutdown context
+shutdownCtx, shutdownCancel := context.WithTimeout(context.Background(), 5*time.Second)
+defer shutdownCancel()
+
+if err := httpServer.Shutdown(shutdownCtx); err != nil {
+    log.Printf("WARN: Server shutdown failed: %v", err)
+}
+
+// Stop Git monitor if enabled
+if cfg.Git.Enabled && gitMonitor != nil {
+    gitMonitor.Stop()
+    log.Println("Git monitor stopped")
+}
+```
+
+This ensures that when the user presses Ctrl+C or when the service is stopped, all components have a chance to clean up before the process exits.
+
+## Context Propagation
+
+Another strength of this pattern is how the context propagates through different operations. In Pull Base, we pass the context to database operations like:
+
+```go
+
+servers, err := m.repo.ListServers(m.ctx, 1000, 0)
+
+```
+
+This creates a chain of cancellation - if the monitor is stopped, all database queries initiated by it should also stop. This is especially valuable for long-running database operations.
+
+## Timeouts vs. Cancellation
+
+Pull Base distinguishes between two types of context-based termination:
+
+- **Cancellation**: Used for operational lifecycle (stopping services)
+- **Timeouts**: Used for bounded operations like database connections
+
+For example, in our database initialization:
+
+```go
+dbCtx, dbCancel := context.WithTimeout(context.Background(), 10*time.Second)
+defer dbCancel()
+```
+
+This ensures database operations don't hang indefinitely, while still allowing for clean error handling.
+
+## Practical Implementation Tips
+
+From my experience building Pull Base, here are some best practices for context-based concurrency:
+
+- **Always Close Resources**: Use defer statements to ensure timers, connections, and other resources are properly closed.
+- **Separate Creation from Starting**: The `Monitor` has distinct creation (`NewMonitor`) and start (`Start`) functions, making the lifecycle clear and testable.
+- **Use Mutex for Shared State**: When your [goroutines](https://gobyexample.com/goroutines) access shared data (like our `watchMap`), always protect it with a mutex:
+
+```go
+func (m *Monitor) checkAllRepositories() {
+    m.mu.Lock()
+    serverIDs := make([]string, 0, len(m.watchMap))
+    for id := range m.watchMap {
+        serverIDs = append(serverIDs, id)
+    }
+    m.mu.Unlock()
+    
+    // Now use the copied IDs without holding the lock
+    for _, serverID := range serverIDs {
+        if err := m.checkRepository(serverID); err != nil {
+            log.Printf("Error checking repository for server %s: %v", serverID, err)
+        }
+    }
+} 
+```
+
+- **Centralized Cancellation**: The `Monitor` only has one cancel function, making it impossible to accidentally cancel only part of the system.
+
+## Conclusion
+
+PullBase's concurrency model demonstrates how Go's context package enables clean, maintainable patterns for managing complex concurrent operations. By implementing context-based cancellation throughout our system, we've created a resilient application that can gracefully handle shutdowns, properly manage resources, and maintain data integrity even during termination.
+The next time you build a Go application with long-running processes, consider adopting this pattern of context-driven design to make your concurrent code more robust and maintainable.
