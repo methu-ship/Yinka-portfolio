@@ -38,7 +38,6 @@ type Monitor struct {
 
 The `Monitor` struct includes:
 - A `mainCancel` field of type `context.CancelFunc`. This field is populated by `Start()` and used by `Stop()` to signal the main polling goroutine to terminate. It is protected by a mutex (`mu`) to prevent race conditions during start/stop operations.
-- Per-repository state (`serverRepos` and `repoLocks`) also protected by the mutex.
 
 ## Starting and Stopping the Monitor
 
