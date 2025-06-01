@@ -11,7 +11,7 @@ The database layer is often the most critical component of any backend applicati
 
 ## Leveraging sqlx for Type-Safe Operations
 
-While Go's standard `database/sql` package provides a solid foundation, it lacks conveniences for mapping between SQL and Go types. In Pull Base, we use the [sqlx](https://github.com/launchbadge/sqlx) library to bridge this gap, providing type-safe query execution and efficient struct mapping.
+While Go's standard `database/sql` package provides a solid foundation, it lacks conveniences for mapping between SQL and Go types. In Pull Base, we use the [sqlx](https://github.com/jmoiron/sqlx) library to bridge this gap, providing type-safe query execution and efficient struct mapping.
 
 The foundation of our approach is a simple Repository pattern:
 
