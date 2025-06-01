@@ -4,6 +4,7 @@ draft: false
 date: '2025-05-12'
 summary: "Let's examine how PullBase implements context-based concurrency management in its GitMonitor component, and how this pattern can be applied to your own Go applications."
 tags: ['Go', 'Concurrency']
+images: ['/static/images/type-safe-database-operations.png']
 ---
 
 Go's concurrency model is a key reason many developers choose the language for systems programming. In Pull Base, I've leveraged Go's context package extensively to create a robust concurrency pattern for our long-running operations. This approach ensures our application can gracefully handle shutdowns, timeouts, and cancellations.
