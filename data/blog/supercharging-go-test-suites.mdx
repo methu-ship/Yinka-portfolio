@@ -13,7 +13,7 @@ Testing is the backbone of reliable software, but as your Go codebase grows, tes
 Our original test suite suffered from common issues:
 - **Slow feedback**: `go test ./...` took 60+ seconds due to database containers
 - **Flaky tests**: Random failures from timing-dependent `time.Sleep()` calls
-- **Code duplication**: 300+ lines of repeated database setup across test files
+- **Code duplication**: 500+ lines of repeated database setup across test files
 - **Poor separation**: Unit and integration tests mixed together
 
 Let's explore how we solved each of these problems.
