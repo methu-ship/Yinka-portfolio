@@ -296,8 +296,8 @@ func waitForCondition(t *testing.T, check func() bool, timeout time.Duration) {
 After implementing these improvements:
 
 ### Performance
-- **Unit test execution**: 60+ seconds → 3-5 seconds
-- **Parallel efficiency**: 25% CPU usage → 200%+ (4-core systems)
+- **Unit test execution**: 60+ seconds → 0.8s seconds
+- **Parallel efficiency**: 25% CPU usage → 300%+ (4-core systems)
 - **Developer feedback loop**: Sub-second for TDD cycles
 
 ### Reliability
@@ -305,7 +305,7 @@ After implementing these improvements:
 - **Deterministic behavior**: Tests pass consistently regardless of system load
 
 ### Maintainability
-- **Code reduction**: Eliminated 300+ lines of duplicate test setup
+- **Code reduction**: Eliminated 500+ lines of duplicate test setup
 - **DRY compliance**: Single source of truth for test infrastructure
 - **Future-proofing**: New tests leverage existing patterns
 
