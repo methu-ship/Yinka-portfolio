@@ -64,10 +64,10 @@ export default function Footer() {
               <span className="absolute -bottom-1 left-0 h-0.5 w-0 bg-gradient-to-r from-pink-500 to-indigo-500 transition-all duration-200 group-hover:w-full" />
             </Link>
             <Link
-              href="/projects"
+              href="https://sheddy.work"
               className="relative text-gray-600 transition-colors duration-300 hover:text-pink-500 dark:text-gray-400 dark:hover:text-pink-400"
             >
-              Projects
+              Work
               <span className="absolute -bottom-1 left-0 h-0.5 w-0 bg-gradient-to-r from-pink-500 to-indigo-500 transition-all duration-200 group-hover:w-full" />
             </Link>
             <Link

@@ -2,9 +2,6 @@
 
 import React from 'react'
 import Link from '@/components/Link'
-import CardSmall from '@/components/CardSmall'
-import CardSeeAll from '@/components/CardSeeAll'
-import projectsData from '@/data/projectsData'
 import Hero from '@/components/Hero'
 import { motion } from 'framer-motion'
 
@@ -33,48 +30,9 @@ const stagger = {
 }
 
 const LandingPage = ({ posts }: LandingPageProps) => {
-  const displayedProjects = projectsData.slice(0, 4)
-  const hasExtraProjects = projectsData.length >= 4
-
   return (
     <div className="relative w-full">
       <Hero />
-
-      {/* Projects Section */}
-      <motion.section
-        initial="initial"
-        whileInView="animate"
-        viewport={{ once: true }}
-        variants={stagger}
-        className="relative w-full px-4 py-20 sm:px-6 lg:px-8"
-      >
-        <div className="absolute inset-0 -z-10 bg-gradient-to-b from-white to-gray-50 dark:from-gray-900 dark:to-gray-800" />
-        <div className="mx-auto max-w-7xl">
-          <motion.h2
-            variants={fadeInUp}
-            className="mb-12 text-center text-3xl font-bold tracking-tight"
-          >
-            Featured Projects
-          </motion.h2>
-          <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
-            {displayedProjects.map((project) => (
-              <motion.div key={project.title} variants={fadeInUp}>
-                <CardSmall
-                  title={project.title}
-                  description={project.description}
-                  imgSrc={project.imgSrc}
-                  href={project.href}
-                />
-              </motion.div>
-            ))}
-            {hasExtraProjects && (
-              <motion.div variants={fadeInUp}>
-                <CardSeeAll />
-              </motion.div>
-            )}
-          </div>
-        </div>
-      </motion.section>
 
       {/* Articles Section */}
       <motion.section
