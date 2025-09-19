@@ -176,12 +176,20 @@ const ModernHero = () => {
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.8 }}
           >
-            <h1 className="mb-6 text-5xl font-bold leading-tight tracking-tight md:text-7xl">
+            <motion.h1 
+              className="mb-6 text-5xl font-bold leading-tight tracking-tight md:text-7xl"
+              animate={{ y: [0, -20, 0], scale: [1, 1.1, 1] }}
+              transition={{ duration: 1.2, repeat: Infinity, repeatType: 'loop', ease: 'easeInOut' }}
+            >
               Hi, I'm{' '}
-              <span className="bg-gradient-to-r from-pink-500 to-indigo-500 bg-clip-text text-transparent">
-                <TypewriterText text="Shedrack Akintayo" />
-              </span>
-            </h1>
+              <motion.span
+                className="bg-gradient-to-r from-pink-500 to-indigo-500 bg-clip-text text-transparent inline-block"
+                animate={{ y: [0, -10, 0], scale: [1, 1.15, 1] }}
+                transition={{ duration: 1.2, repeat: Infinity, repeatType: 'loop', ease: 'easeInOut', delay: 0.2 }}
+              >
+                <TypewriterText text="Yinka Habeeb" />
+              </motion.span>
+            </motion.h1>
           </motion.div>
 
           <motion.p
@@ -190,7 +198,7 @@ const ModernHero = () => {
             transition={{ duration: 0.8, delay: 0.2 }}
             className="mb-8 text-xl text-gray-600 dark:text-gray-300 md:text-2xl"
           >
-            <TypewriterText text="DevOps | Solutions Architect | Technical Writer" delay={2} />
+            <TypewriterText text="Blockchain Engineer | Technical Writer" delay={2} />
           </motion.p>
 
           <motion.div

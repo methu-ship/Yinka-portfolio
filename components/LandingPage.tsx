@@ -137,38 +137,7 @@ const LandingPage = ({ posts }: LandingPageProps) => {
             <motion.blockquote
               variants={fadeInUp}
               className="text-center text-2xl font-medium italic leading-relaxed text-gray-700 dark:text-gray-300"
-            >
-              <span className="relative">
-                <span className="relative z-10">
-                  Shedrack is a positive and energetic individual who brings a smile to what he
-                  does. He works well with others and has a collaborative approach that makes him
-                  easy to work with.
-                </span>
-                <div className="absolute -inset-1 -z-10 block h-full w-full rotate-1 bg-gradient-to-r from-pink-500/5 to-indigo-500/5" />
-              </span>
-              <br />
-              <span className="relative">
-                <span className="relative z-10">
-                  Shedrack is a team player who is approachable and fosters a sense of camaraderie
-                  among his colleagues.
-                </span>
-                <div className="absolute -inset-1 -z-10 block h-full w-full -rotate-1 bg-gradient-to-r from-indigo-500/5 to-pink-500/5" />
-              </span>
-            </motion.blockquote>
-
-            {/* Author info */}
-            <motion.div
-              variants={fadeInUp}
-              className="mt-8 flex flex-col items-center justify-center space-y-2"
-            >
-              <div className="h-px w-12 bg-gradient-to-r from-pink-500/50 to-indigo-500/50" />
-              <p className="text-lg font-semibold text-gray-900 dark:text-gray-100">
-                Bill Mulligan
-              </p>
-              <p className="text-sm text-gray-600 dark:text-gray-400">
-                Community, Isovalent at Cisco
-              </p>
-            </motion.div>
+            />
           </div>
         </div>
       </motion.section>

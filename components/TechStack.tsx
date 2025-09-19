@@ -87,7 +87,7 @@ const TechStack = ({ programmingLanguages, tools }: TechStackProps) => {
       {/* DevOps Tools */}
       <div>
         <h3 className="mb-4 text-xl font-semibold text-gray-800 dark:text-gray-200">
-          DevOps & Cloud Technologies
+          Blockchain Stack
         </h3>
         <motion.div
           variants={container}

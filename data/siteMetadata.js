@@ -1,8 +1,8 @@
 /** @type {import("pliny/config").PlinyConfig } */
 const siteMetadata = {
-  title: 'Shedrack Akintayo | DevOps Engineer & Solutions Architect',
-  author: 'Shedrack Akintayo',
-  headerTitle: 'Shedrack Akintayo',
+  title: 'Yinka Habeeb | Software Engineer & Technical Writer',
+  author: 'Yinka Habeeb',
+  headerTitle: 'Yinka Habeeb',
   description: 'A blog for byte-sized articles on things that interest me',
   language: 'en-us',
   theme: 'system', // system, dark or light

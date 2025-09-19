@@ -33,9 +33,9 @@ export default function Page() {
   // Core Languages and Development Tools
   const programmingLanguages = [
     {
-      name: 'Golang',
-      icon: 'https://github.com/devicons/devicon/raw/refs/heads/master/icons/go/go-original.svg',
-      link: 'https://golang.org',
+      name: 'Rust',
+      icon: 'https://www.rust-lang.org/logos/rust-logo-blk.svg',
+      link: 'https://www.rust-lang.org/',
     },
     {
       name: 'Bash',
@@ -52,24 +52,9 @@ export default function Page() {
   // DevOps and Cloud Tools
   const tools = [
     {
-      name: 'Kubernetes',
-      icon: 'https://github.com/devicons/devicon/raw/refs/heads/master/icons/kubernetes/kubernetes-plain.svg',
-      link: 'https://kubernetes.io',
-    },
-    {
       name: 'AWS',
       icon: 'https://upload.wikimedia.org/wikipedia/commons/9/93/Amazon_Web_Services_Logo.svg',
       link: 'https://aws.amazon.com',
-    },
-    {
-      name: 'Cilium',
-      icon: 'https://cilium.io/static/cilium-light-1-508660eccad04d0ef109a0be1dc4d416.svg',
-      link: 'https://cilium.io',
-    },
-    {
-      name: 'Terraform',
-      icon: 'https://github.com/devicons/devicon/raw/refs/heads/master/icons/terraform/terraform-original-wordmark.svg',
-      link: 'https://www.terraform.io',
     },
     {
       name: 'Docker',
@@ -77,9 +62,9 @@ export default function Page() {
       link: 'https://www.docker.com',
     },
     {
-      name: 'Ansible',
-      icon: 'https://github.com/devicons/devicon/raw/refs/heads/master/icons/ansible/ansible-original-wordmark.svg',
-      link: 'https://www.ansible.com',
+      name: 'Solidity',
+      icon: 'https://github.com/devicons/devicon/raw/refs/heads/master/icons/solidity/solidity-original.svg',
+      link: 'https://soliditylang.org/',
     },
     {
       name: 'Linux',
@@ -87,19 +72,19 @@ export default function Page() {
       link: 'https://www.kernel.org',
     },
     {
-      name: 'Traefik',
-      icon: 'https://github.com/devicons/devicon/raw/refs/heads/master/icons/traefikproxy/traefikproxy-original-wordmark.svg',
-      link: 'https://traefik.io',
-    },
-    {
-      name: 'Helm',
+      name: 'Stylus',
       icon: 'https://github.com/devicons/devicon/raw/refs/heads/master/icons/helm/helm-original.svg',
-      link: 'https://helm.sh',
+      link: 'https://stylus-by-example.org/',
     },
     {
       name: 'Prometheus',
       icon: 'https://github.com/devicons/devicon/raw/refs/heads/master/icons/prometheus/prometheus-original.svg',
       link: 'https://prometheus.io',
+    },
+     {
+      name: 'tenderly',
+      icon: 'https://github.com/devicons/devicon/raw/refs/heads/master/icons/prometheus/prometheus-original.svg',
+      link: 'https://tenderly.co/',
     },
     {
       name: 'Grafana',
@@ -112,14 +97,14 @@ export default function Page() {
       link: 'https://github.com/features/actions',
     },
     {
-      name: 'Jenkins',
-      icon: 'https://github.com/devicons/devicon/raw/refs/heads/master/icons/jenkins/jenkins-original.svg',
-      link: 'https://www.jenkins.io',
+      name: 'postgresql',
+      icon: 'https://github.com/devicons/devicon/raw/refs/heads/master/icons/postgresql/postgresql-original-wordmark.svg',
+      link: 'https://www.postgresql.org/',
     },
-    {
-      name: 'MongoDB',
-      icon: 'https://github.com/devicons/devicon/raw/refs/heads/master/icons/mongodb/mongodb-original-wordmark.svg',
-      link: 'https://www.mongodb.com',
+     {
+      name: 'postman',
+      icon: 'https://github.com/devicons/devicon/raw/refs/heads/master/icons/postman/postman-original.svg',
+      link: 'https://www.postman.com/',
     },
   ]
 
