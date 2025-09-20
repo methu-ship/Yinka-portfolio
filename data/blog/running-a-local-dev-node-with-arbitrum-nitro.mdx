@@ -1,0 +1,63 @@
+---
+title: "Running a Local Dev node with Arbitrum Nitro"
+draft: false
+date: '2025-08-06'
+summary: 'Learn how to run an Arbitrum Nitro dev node'
+lastmod: '2025-08-06'
+tags: [Stylus, Blockchain]
+---
+
+Running a dev node allows you to experiment with deploying and testing your smart contracts before deploying them to the live Arbitrum network. If you’re coming from a Solidity background, you’ll be familiar with this workflow; it’s similar to running a local devnet using Hardhat or Anvil in Foundry.
+
+### Step 1: Install Prerequisites
+ - Docker Desktop
+
+Go [to](https://www.docker.com/products/docker-desktop/) and install Docker for your operating system (Windows, Mac, or Linux). After installation, open Docker so it runs in the background.
+
+ - Foundry
+
+Install Foundry for testing your contract in the dev environment:
+
+```bash
+curl -L https://foundry.paradigm.xyz | bash
+```
+This installs forge, cast, and other tools.
+
+### Step 2: Get the Nitro Dev Node
+
+Open your terminal and run:
+
+```bash
+git clone https://github.com/OffchainLabs/nitro-devnode.git
+cd nitro-devnode
+```
+
+This downloads the official Nitro dev node scripts.
+
+### Step 3: Start the Nitro Dev Node
+
+In the nitro devnode directory, start the Arbitrum node:
+
+```bash
+./run-dev-node.sh
+```
+
+![a diagram showing the first terminal](/static/images/terminal-output-1.png 'node')
+
+Once it runs successfully, you should see output similar to the example shown above.
+
+### Step 4: Testing
+
+Open a new terminal and run:
+
+```bash
+curl -X POST http://localhost:8547/ \
+  -H "Content-Type: application/json" \
+  -d '{"jsonrpc":"2.0","method":"eth_blockNumber","params":[],"id":1}'
+```
+
+You should get back a hex number (like “0x7”). If so, congratulations, you’re all set.
+
+![a diagram showing the first terminal](/static/images/terminal-output-2.png 'node')
+
+And that’s it! We’ve successfully set up a local dev node using Arbitrum Nitro. Next, we’ll see how to scaffold a Stylus project, test it, and deploy a contract on the devnet. Till then, happy coding.

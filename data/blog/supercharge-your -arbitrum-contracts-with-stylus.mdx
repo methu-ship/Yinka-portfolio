@@ -1,0 +1,351 @@
+---
+title: "Supercharge Your Arbitrum Contracts with Stylus"
+draft: false
+date: '2025-08-21'
+summary: 'How to write an Arbitrum Contract with Stylus'
+lastmod: '2025-08-21'
+tags: [Stylus, Blockchain]
+---
+
+Stylus is a high-performance framework for writing Arbitrum smart contracts with outstanding speed and developer-friendly tooling. Stylus gives developers who crave the efficiency of web assembly while maintaining a modern development workflow.
+
+In this guide, you’ll learn:
+
+- What Stylus is and how it compares to Solidity
+- How to build an ERC-20 token with Stylus
+- How to write a test for the contract
+- How to deploy the contract to a local dev node.
+
+**Prerequisites**
+
+Before starting with this tutorial, it assumes you’re familiar with:
+
+- Smart contract development, particularly with Solidity.
+- Basic Rust programming
+
+## What is Stylus?
+Stylus is a smart contract language that compiles to WASM, allowing developers to tap into the libraries and tooling that Rust provides.
+
+
+
+## Why Stylus?
+Stylus enables developers to write efficient, secure smart contracts in Rust, C, or C++ on Arbitrum, offering up to 86.6% lower gas costs and full EVM interoperability for complex, high-performance dApps.
+
+**Stylus vs Solidity**
+![table showing the diff between Stylus & Solidity](/static/images/stylus-vs-solidity.png 's')
+
+## How to Create an ERC20 Token using Stylus
+To demonstrate how Stylus works, we’re going to implement a simple ERC20 token. This guide walks you through the full process step by step, and if you prefer a visual format, you can watch this [video](https://www.youtube.com/watch?v=28CpV24t374).
+
+### Step 1: Set Up Your Development Environment
+**Install Rust**
+
+Run the following to install Rust and add WebAssembly support:
+
+```bash
+curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh
+rustup default 1.81
+rustup target add wasm32-unknown-unknown --toolchain 1.81
+```
+
+After installation, verify that Rust and Cargo were installed correctly by checking their versions
+
+```bash
+rustc --version
+cargo --version
+```
+
+If both commands return version numbers without errors, your setup is working.
+
+**Install Stylus**
+
+```bash
+cargo install --force cargo-stylus
+```
+
+If you haven’t installed the dev node, check this [guide](./running-a-local-dev-node-with-arbitrum-nitro.mdx) on how to; we’ll be using it for our contract deployment.
+
+### Step 2: Create a Stylus Project
+**Initialize a New Project**
+
+Once Rust is installed, the next step is to scaffold a new Stylus project. The *cargo-stylus* CLI makes this easy. Run:
+
+```bash
+cargo stylus new erc20-token
+cd erc20-token
+```
+
+This creates a new folder named erc20-token with the basic project structure for writing and deploying a Stylus contract.
+
+### Step 3: Implement the ERC20 Token
+When you generate a new Stylus project, it ships with a counter contract. Let’s replace it with our full ERC20 implementation.
+
+Navigate into the `erc20-token/src/lib.rs` file and replace its contents with the following:
+
+
+```Rust
+#![cfg_attr(not(any(feature = "export-abi", test)), no_main)]
+extern crate alloc;
+
+use alloy_primitives::{Address, U256};
+use alloy_sol_types::sol;
+use stylus_sdk::{evm, msg, prelude::*};
+
+sol! {
+    event Transfer(address indexed from, address indexed to, uint256 value);
+    event Approval(address indexed owner, address indexed spender, uint256 value);
+
+    error InsufficientBalance(address from, uint256 have, uint256 want);
+    error InsufficientAllowance(address owner, address spender, uint256 have, uint256 want);
+}
+
+#[derive(SolidityError)]
+pub enum Erc20Error {
+    InsufficientBalance(InsufficientBalance),
+    InsufficientAllowance(InsufficientAllowance),
+}
+
+sol_storage! {
+    #[entrypoint]
+    pub struct SimpleToken {
+        string name;
+        string symbol;
+        uint256 decimals;
+        mapping(address => uint256) balances;
+        mapping(address => mapping(address => uint256)) allowances;
+        uint256 total_supply;
+        address owner;
+    }
+}
+```
+### What’s happening here?
+
+- `sol! { ... }` This block lets you define Solidity-style events and errors in Rust. In our case, Transfer and Approval are included because they’re standard in any ERC20 contract and allow other applications to track token movements.
+- `sol_storage! { ... }` :This is where the contract’s state lives. We store metadata (name, symbol, decimals), balances for each address, allowances for approvals, total supply, and the owner’s address. Think of this like Solidity mapping and state variables, but written in Rust.
+- `#[entrypoint]`:This tells Stylus that simpleToken is the main contract entry point. Without it, the contract wouldn’t be callable on-chain.
+
+Next, let’s implement the ERC20 methods (transfer, approve, mint functions).
+
+```Rust
+impl SimpleToken {
+    fn emit_transfer(&self, from: Address, to: Address, value: U256) {
+        #[cfg(not(test))]
+        evm::log(Transfer { from, to, value });
+    }
+
+    fn emit_approval(&self, owner: Address, spender: Address, value: U256) {
+        #[cfg(not(test))]
+        evm::log(Approval { owner, spender, value });
+    }
+}
+
+#[public]
+impl SimpleToken {
+    pub fn init(
+        &mut self,
+        name: String,
+        symbol: String,
+        decimals: u8,
+        initial_supply: U256,
+    ) -> Result<(), Vec<u8>> {
+        self.name.set_str(&name);
+        self.symbol.set_str(&symbol);
+        self.decimals.set(U256::from(decimals)); 
+
+        let deployer = self.vm().msg_sender();
+        self.owner.set(deployer);
+
+        if initial_supply > U256::ZERO {
+            self.balances.setter(deployer).set(initial_supply);
+            self.total_supply.set(initial_supply);
+            self.emit_transfer(Address::ZERO, deployer, initial_supply);
+        }
+        Ok(())
+    }
+
+    pub fn name(&self) -> String { self.name.get_string() }
+    pub fn symbol(&self) -> String { self.symbol.get_string() }
+    pub fn decimals(&self) -> U256 { self.decimals.get() }
+    pub fn total_supply(&self) -> U256 { self.total_supply.get() }
+    pub fn balance_of(&self, owner: Address) -> U256 { self.balances.get(owner) }
+
+    pub fn transfer(&mut self, to: Address, value: U256) -> Result<bool, Erc20Error> {
+        self._transfer(self.vm().msg_sender(), to, value)?;
+        Ok(true)
+    }
+
+    pub fn approve(&mut self, spender: Address, value: U256) -> bool {
+        self.allowances.setter(self.vm().msg_sender()).insert(spender, value);
+        self.emit_approval(self.vm().msg_sender(), spender, value);
+        true
+    }
+
+    pub fn allowance(&self, owner: Address, spender: Address) -> U256 {
+        self.allowances.getter(owner).get(spender)
+    }
+
+    pub fn transfer_from(
+        &mut self,
+        from: Address,
+        to: Address,
+        value: U256,
+    ) -> Result<bool, Erc20Error> {
+        let mut sender_allowances = self.allowances.setter(from);
+        let mut allowance = sender_allowances.setter(msg::sender());
+        let old_allowance = allowance.get();
+
+        if old_allowance < value {
+            return Err(Erc20Error::InsufficientAllowance(InsufficientAllowance {
+                owner: from,
+                spender: self.vm().msg_sender(),
+                have: old_allowance,
+                want: value,
+            }));
+        }
+
+        allowance.set(old_allowance - value);
+        self._transfer(from, to, value)?;
+        Ok(true)
+    }
+
+    pub fn mint(&mut self, to: Address, amount: U256) -> Result<bool, Vec<u8>> {
+        if self.vm().msg_sender() != self.owner.get() {
+            return Err(b"Only owner can mint".to_vec());
+        }
+        if to == Address::ZERO {
+            return Err(b"Cannot mint to address zero".to_vec());
+        }
+
+        let current_balance = self.balances.get(to);
+        self.balances.setter(to).set(current_balance + amount);
+        self.total_supply.set(self.total_supply.get() + amount);
+
+        self.emit_transfer(Address::ZERO, to, amount);
+        Ok(true)
+    }
+
+    fn _transfer(&mut self, from: Address, to: Address, value: U256) -> Result<(), Erc20Error> {
+        let old_sender_balance = self.balances.get(from);
+        if old_sender_balance < value {
+            return Err(Erc20Error::InsufficientBalance(InsufficientBalance {
+                from,
+                have: old_sender_balance,
+                want: value,
+            }));
+        }
+
+        self.balances.setter(from).set(old_sender_balance - value);
+        let old_recipient_balance = self.balances.get(to);
+        self.balances.setter(to).set(old_recipient_balance + value);
+
+        self.emit_transfer(from, to, value);
+        Ok(())
+    }
+}
+```
+Here’s what each function in our ERC20 contract does
+
+- `init`:Runs once when the contract is deployed. This is the constructor. It sets up the token’s metadata (name, symbol, decimals) and mints the initial supply directly to the deployer’s account.
+- `transfer`:This allows users to send tokens from their account to another address.
+- `approve`:Let an account permit another (the spender) to use a certain number of tokens on their behalf.
+- `transfer_from`:This is used by the spender to move tokens from the owner’s account, as long as it’s within the approved allowance.
+- `mint`:Function for the contract owner to create new tokens and assign them to an account.
+- `_transfer`:An internal helper that handles the actual balance updates when tokens move between accounts.
+
+We have a fully working ERC20 implementation in Stylus. Now, if we run:
+
+```bash
+cargo build
+```
+Our contract should compile without errors. Congratulations on making it this far. The next step is to test our contract to make sure everything works as expected.
+
+### Step 4: Writing Tests
+Stylus uses Rust’s built-in testing utilities, which makes it straightforward to validate our contract logic. By convention, tests are written inside a `#[cfg(test)]` module.
+
+For this guide, we’ll place our test module at the bottom of lib.rs. This ensures that tests live alongside the main contract code but are only compiled and run when we explicitly test.
+
+```Rust
+#[cfg(test)]
+mod test {
+    use super::*;
+    use alloy_primitives::address;
+    use stylus_sdk::testing::*;
+
+    #[test]
+    fn test_token_initialization() {
+        let vm = TestVMBuilder::new()
+            .sender(address!("0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266"))
+            .build();
+        let mut contract = SimpleToken::from(&vm);
+        
+        let result = contract.init(
+            "Test Token".to_string(),
+            "TEST".to_string(),
+            18,
+            U256::from(1000000),
+        );
+
+        assert!(result.is_ok());
+        assert_eq!(contract.name(), "Test Token");
+        assert_eq!(contract.symbol(), "TEST");
+        assert_eq!(contract.decimals(), U256::from(18));
+        assert_eq!(contract.total_supply(), U256::from(1000000));
+    }
+
+    #[test]
+    fn test_transfer() {
+        let vm = TestVMBuilder::new()
+            .sender(address!("0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266"))
+            .build();
+        let mut contract = SimpleToken::from(&vm);
+        let user = address!("0xCDC41bff86a62716f050622325CC17a317f99404");
+        
+        contract.init("Test Token".to_string(), "TEST".to_string(), 18, U256::from(1000)).unwrap();
+        
+        let result = contract.transfer(user, U256::from(100));
+        assert!(result.is_ok());
+        assert_eq!(contract.balance_of(user), U256::from(100));
+    }
+}
+```
+- `#[cfg(test)]` tells Stylus to only include this module when running cargo test.
+- `use super::*` pulls in your main contract code so tests can call it directly.
+- `Env::default()` sets up a simulated blockchain environment for testing.
+- `SimpleToken::deploy(...)` mimics deploying the contract with initial arguments.
+- `assert_eq!` checks that the expected value matches the actual result.
+
+Now run the test with:
+
+```bash
+cargo test
+```
+We should get the following. If you get the same output, your contract passed the tests.
+
+```bash
+ Finished `test` profile [unoptimized + debuginfo] target(s) in 10.89s
+     Running unittests src/lib.rs (target/debug/deps/stylus_ERC20_TOKEN-26a10840cac97c66)
+
+running 2 tests
+test test::test_token_initialization ... ok
+test test::test_transfer ... ok
+
+test result: ok. 2 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running unittests src/main.rs (target/debug/deps/stylus_hello_world-6d63a656cf835551)
+```
+
+### Step 5: Deploy to Local Arbitrum Dev Node
+With a local Arbitrum Nitro dev node running, you can deploy the compiled WASM contract using the Stylus CLI. Run:
+
+```bash
+cargo stylus deploy \
+  --endpoint='http://localhost:8547' \
+  --private-key="0xb6b15c8cb491557369f3c7d2c287b053eb229daa9c22138887752191c9520659" \
+  --constructor-args="MyToken,MT,18,1000000"
+```
+
+We’re passing constructor arguments because the contract requires them during deployment. Once deployment succeeds, you should see an output similar to the one shown below.
+
+![Result](/static/images/output.png 's')
+
+Congratulations! You’ve just written an ERC20 token in Stylus, tested it, and deployed it to a local Arbitrum dev node. From here, you can extend your token with features like burn or pause functions, deploy it to an Arbitrum testnet, or integrate it into a live dApp. Happy coding.
