@@ -1,5 +1,5 @@
 ---
-title: "Supercharge Your Arbitrum Contracts with Stylus"
+title: 'Supercharge Your Arbitrum Contracts with Stylus'
 draft: false
 date: '2025-08-21'
 summary: 'How to write an Arbitrum Contract with Stylus'
@@ -24,20 +24,22 @@ Before starting with this tutorial, it assumes you’re familiar with:
 - Basic Rust programming
 
 ## What is Stylus?
+
 Stylus is a smart contract language that compiles to WASM, allowing developers to tap into the libraries and tooling that Rust provides.
 
-
-
 ## Why Stylus?
+
 Stylus enables developers to write efficient, secure smart contracts in Rust, C, or C++ on Arbitrum, offering up to 86.6% lower gas costs and full EVM interoperability for complex, high-performance dApps.
 
 **Stylus vs Solidity**
 ![table showing the diff between Stylus & Solidity](/static/images/stylus-vs-solidity.png 's')
 
 ## How to Create an ERC20 Token using Stylus
+
 To demonstrate how Stylus works, we’re going to implement a simple ERC20 token. This guide walks you through the full process step by step, and if you prefer a visual format, you can watch this [video](https://www.youtube.com/watch?v=28CpV24t374).
 
 ### Step 1: Set Up Your Development Environment
+
 **Install Rust**
 
 Run the following to install Rust and add WebAssembly support:
@@ -66,9 +68,10 @@ cargo install --force cargo-stylus
 If you haven’t installed the dev node, check this [guide](./running-a-local-dev-node-with-arbitrum-nitro.mdx) on how to; we’ll be using it for our contract deployment.
 
 ### Step 2: Create a Stylus Project
+
 **Initialize a New Project**
 
-Once Rust is installed, the next step is to scaffold a new Stylus project. The *cargo-stylus* CLI makes this easy. Run:
+Once Rust is installed, the next step is to scaffold a new Stylus project. The _cargo-stylus_ CLI makes this easy. Run:
 
 ```bash
 cargo stylus new erc20-token
@@ -78,10 +81,10 @@ cd erc20-token
 This creates a new folder named erc20-token with the basic project structure for writing and deploying a Stylus contract.
 
 ### Step 3: Implement the ERC20 Token
+
 When you generate a new Stylus project, it ships with a counter contract. Let’s replace it with our full ERC20 implementation.
 
 Navigate into the `erc20-token/src/lib.rs` file and replace its contents with the following:
-
 
 ```Rust
 #![cfg_attr(not(any(feature = "export-abi", test)), no_main)]
@@ -118,6 +121,7 @@ sol_storage! {
     }
 }
 ```
+
 ### What’s happening here?
 
 - `sol! { ... }` This block lets you define Solidity-style events and errors in Rust. In our case, Transfer and Approval are included because they’re standard in any ERC20 contract and allow other applications to track token movements.
@@ -150,7 +154,7 @@ impl SimpleToken {
     ) -> Result<(), Vec<u8>> {
         self.name.set_str(&name);
         self.symbol.set_str(&symbol);
-        self.decimals.set(U256::from(decimals)); 
+        self.decimals.set(U256::from(decimals));
 
         let deployer = self.vm().msg_sender();
         self.owner.set(deployer);
@@ -243,6 +247,7 @@ impl SimpleToken {
     }
 }
 ```
+
 Here’s what each function in our ERC20 contract does
 
 - `init`:Runs once when the contract is deployed. This is the constructor. It sets up the token’s metadata (name, symbol, decimals) and mints the initial supply directly to the deployer’s account.
@@ -257,9 +262,11 @@ We have a fully working ERC20 implementation in Stylus. Now, if we run:
 ```bash
 cargo build
 ```
+
 Our contract should compile without errors. Congratulations on making it this far. The next step is to test our contract to make sure everything works as expected.
 
 ### Step 4: Writing Tests
+
 Stylus uses Rust’s built-in testing utilities, which makes it straightforward to validate our contract logic. By convention, tests are written inside a `#[cfg(test)]` module.
 
 For this guide, we’ll place our test module at the bottom of lib.rs. This ensures that tests live alongside the main contract code but are only compiled and run when we explicitly test.
@@ -277,7 +284,7 @@ mod test {
             .sender(address!("0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266"))
             .build();
         let mut contract = SimpleToken::from(&vm);
-        
+
         let result = contract.init(
             "Test Token".to_string(),
             "TEST".to_string(),
@@ -299,15 +306,16 @@ mod test {
             .build();
         let mut contract = SimpleToken::from(&vm);
         let user = address!("0xCDC41bff86a62716f050622325CC17a317f99404");
-        
+
         contract.init("Test Token".to_string(), "TEST".to_string(), 18, U256::from(1000)).unwrap();
-        
+
         let result = contract.transfer(user, U256::from(100));
         assert!(result.is_ok());
         assert_eq!(contract.balance_of(user), U256::from(100));
     }
 }
 ```
+
 - `#[cfg(test)]` tells Stylus to only include this module when running cargo test.
 - `use super::*` pulls in your main contract code so tests can call it directly.
 - `Env::default()` sets up a simulated blockchain environment for testing.
@@ -319,6 +327,7 @@ Now run the test with:
 ```bash
 cargo test
 ```
+
 We should get the following. If you get the same output, your contract passed the tests.
 
 ```bash
@@ -335,6 +344,7 @@ test result: ok. 2 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; fini
 ```
 
 ### Step 5: Deploy to Local Arbitrum Dev Node
+
 With a local Arbitrum Nitro dev node running, you can deploy the compiled WASM contract using the Stylus CLI. Run:
 
 ```bash

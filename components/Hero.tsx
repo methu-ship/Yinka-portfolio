@@ -176,7 +176,7 @@ const ModernHero = () => {
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.8 }}
           >
-            <motion.h1 
+            <motion.h1
               className="mb-6 text-5xl font-bold leading-tight tracking-tight md:text-7xl"
               animate={{ y: [0, -20, 0], scale: [1, 1.1, 1] }}
               transition={{

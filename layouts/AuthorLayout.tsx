@@ -53,28 +53,28 @@ export default function AuthorLayout({ children, content, toc }: Props) {
           ))}
         </div>
         {/* Hero Section */}
-    <div className="relative overflow-hidden">
-      <div className="absolute inset-0 bg-[radial-gradient(#e5e7eb_1px,transparent_1px)] opacity-50 [background-size:16px_16px] dark:bg-[radial-gradient(#1f2937_1px,transparent_1px)]" />
-      <style jsx global>{`
-        @keyframes bubble {
-          0% {
-            transform: translateY(0) scale(1);
-            opacity: 0.3;
-          }
-          50% {
-            opacity: 0.5;
-          }
-          100% {
-            transform: translateY(-120px) scale(1.1);
-            opacity: 0;
-          }
-        }
-        .animate-bubble {
-          animation-name: bubble;
-          animation-timing-function: ease-in-out;
-          animation-iteration-count: infinite;
-        }
-      `}</style>
+        <div className="relative overflow-hidden">
+          <div className="absolute inset-0 bg-[radial-gradient(#e5e7eb_1px,transparent_1px)] opacity-50 [background-size:16px_16px] dark:bg-[radial-gradient(#1f2937_1px,transparent_1px)]" />
+          <style jsx global>{`
+            @keyframes bubble {
+              0% {
+                transform: translateY(0) scale(1);
+                opacity: 0.3;
+              }
+              50% {
+                opacity: 0.5;
+              }
+              100% {
+                transform: translateY(-120px) scale(1.1);
+                opacity: 0;
+              }
+            }
+            .animate-bubble {
+              animation-name: bubble;
+              animation-timing-function: ease-in-out;
+              animation-iteration-count: infinite;
+            }
+          `}</style>
           <div className="relative px-6 py-12 sm:px-8 sm:py-16 md:py-20 lg:px-10">
             <motion.div
               initial={{ opacity: 0, y: 20 }}
@@ -109,7 +109,12 @@ export default function AuthorLayout({ children, content, toc }: Props) {
                   <motion.h1
                     className="bg-gradient-to-r from-gray-800 to-gray-900 bg-clip-text text-4xl font-bold tracking-tight text-transparent dark:from-gray-100 dark:to-white sm:text-5xl"
                     animate={{ y: [0, -20, 0], scale: [1, 1.1, 1] }}
-                    transition={{ duration: 1.2, repeat: Infinity, repeatType: 'loop', ease: 'easeInOut' }}
+                    transition={{
+                      duration: 1.2,
+                      repeat: Infinity,
+                      repeatType: 'loop',
+                      ease: 'easeInOut',
+                    }}
                   >
                     {name}
                   </motion.h1>

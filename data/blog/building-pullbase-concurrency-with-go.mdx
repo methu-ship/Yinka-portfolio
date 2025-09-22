@@ -38,6 +38,7 @@ type Monitor struct {
 ```
 
 The `Monitor` struct includes:
+
 - A `mainCancel` field of type `context.CancelFunc`. This field is populated by `Start()` and used by `Stop()` to signal the main polling goroutine to terminate. It is protected by a mutex (`mu`) to prevent race conditions during start/stop operations.
 
 ## Starting and Stopping the Monitor
@@ -80,6 +81,7 @@ func (m *Monitor) Stop() {
 ```
 
 This pattern ensures:
+
 - The context's lifecycle is tied to the monitor's started/stopped state.
 - The `mainCancel` function acts as the primary signal for graceful shutdown of the polling loop.
 - Proper locking prevents race conditions if `Start` or `Stop` are called concurrently.
@@ -110,6 +112,7 @@ func (m *Monitor) runPollingLoop(ctx context.Context) {
 ```
 
 This pattern provides several key benefits:
+
 - The loop automatically terminates when the `ctx` passed from `Start` is cancelled via `Stop`.
 - Resources (the timer) are properly cleaned up via `defer`.
 - Using `timer.Reset` ensures consistent polling frequency without overlap.
@@ -221,6 +224,7 @@ if err := repo.FetchContext(fetchCtx, opts); err != nil {
 // ... rest of the check logic ...
 }
 ```
+
 This selective use of timeouts adds resilience against external dependencies like the network or Git operations, while the main context handles the overall lifecycle cancellation.
 
 ## Practical Implementation Tips
@@ -232,7 +236,7 @@ From my experience building Pull Base, here are some best practices for context-
 - **Graceful Shutdown Signal**: Use the `context.CancelFunc` obtained from `context.WithCancel` as the primary mechanism to signal shutdown to the main loop of a background process.
 - **Operation Timeouts**: Apply `context.WithTimeout` to specific, potentially blocking operations (I/O, network calls, external processes) to prevent them from hanging indefinitely. Always `defer cancel()` for these timeout contexts.
 - **Bounded Concurrency**: Utilize tools like `errgroup.Group` with `SetLimit` to control the number of concurrent goroutines performing similar tasks, preventing resource exhaustion. Pass the group's derived context (`gCtx`) to worker goroutines.
-- **Mutex for Shared State**: Protect access to shared data structures (like `serverRepos` and `repoLocks`) with appropriate mutexes (`sync.RWMutex` or `sync.Mutex`). Keep critical sections short. For operations involving concurrency *and* shared state (like `checkAllRepositories`), acquire locks carefully (e.g., use read locks to copy data needed by workers, and specific locks within workers if they modify shared state).
+- **Mutex for Shared State**: Protect access to shared data structures (like `serverRepos` and `repoLocks`) with appropriate mutexes (`sync.RWMutex` or `sync.Mutex`). Keep critical sections short. For operations involving concurrency _and_ shared state (like `checkAllRepositories`), acquire locks carefully (e.g., use read locks to copy data needed by workers, and specific locks within workers if they modify shared state).
 
 ## Conclusion
 

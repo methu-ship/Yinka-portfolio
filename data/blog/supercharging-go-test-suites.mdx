@@ -1,8 +1,8 @@
 ---
-title: "Supercharging Go Test Suites: Build Tags, Parallel Testing, and Proper Async Patterns"
+title: 'Supercharging Go Test Suites: Build Tags, Parallel Testing, and Proper Async Patterns'
 draft: false
-date: "2025-08-01"
-summary: "Discover four key techniques that dramatically improved test performance and reliability in a real-world Go project: build tags for test separation, shared utilities, parallel execution, and proper async testing patterns."
+date: '2025-08-01'
+summary: 'Discover four key techniques that dramatically improved test performance and reliability in a real-world Go project: build tags for test separation, shared utilities, parallel execution, and proper async testing patterns.'
 tags: ['Go', 'Testing', 'Performance', 'Best Practices']
 ---
 
@@ -11,6 +11,7 @@ Testing is the backbone of reliable software, but as your Go codebase grows, tes
 ## The Problem: Slow, Flaky, and Hard-to-Maintain Tests
 
 Our original test suite suffered from common issues:
+
 - **Slow feedback**: `go test ./...` took 60+ seconds due to database containers
 - **Flaky tests**: Random failures from timing-dependent `time.Sleep()` calls
 - **Code duplication**: 500+ lines of repeated database setup across test files
@@ -48,7 +49,7 @@ func TestFullWorkflow(t *testing.T) {
 # Fast unit tests only (seconds)
 go test ./...
 
-# All tests including integration (minutes)  
+# All tests including integration (minutes)
 go test -tags=integration ./...
 ```
 
@@ -80,13 +81,13 @@ func setupTestDB(t *testing.T) *sql.DB {
         // ... 50+ lines of setup
     )
     require.NoError(t, err)
-    
+
     db, err := sql.Open("postgres", connectionString)
     require.NoError(t, err)
-    
+
     // Run migrations or manual schema creation
     // ... another 50+ lines
-    
+
     return db
 }
 ```
@@ -99,12 +100,12 @@ func SetupTestDB(t *testing.T) (*sql.DB, func()) {
     container := StartPostgresContainer(t)
     db := connectToContainer(t, container)
     MustMigrate(t, db)
-    
+
     cleanup := func() {
         db.Close()
         container.Terminate(ctx)
     }
-    
+
     return db, cleanup
 }
 
@@ -124,12 +125,12 @@ func CreateTestUser(t *testing.T, db *sql.DB, email string) *User {
 ```go
 func TestUserCreation(t *testing.T) {
     testutil.SkipIfShort(t)
-    
+
     db, cleanup := testutil.SetupTestDB(t)
     defer cleanup()
-    
+
     user := testutil.CreateTestUser(t, db, "test@example.com")
-    
+
     // Focus on test logic, not setup
     assert.Equal(t, "test@example.com", user.Email)
 }
@@ -151,7 +152,7 @@ Go's test runner is designed for parallel execution, but many teams don't take a
 ```go
 func TestTokenGeneration(t *testing.T) {
     t.Parallel() // Safe - no shared state
-    
+
     token := GenerateSecureToken()
     assert.NotEmpty(t, token)
     assert.Len(t, token, 32)
@@ -159,7 +160,7 @@ func TestTokenGeneration(t *testing.T) {
 
 func TestTokenValidation(t *testing.T) {
     t.Parallel() // Safe - pure function
-    
+
     tests := []struct {
         name  string
         token string
@@ -169,12 +170,12 @@ func TestTokenValidation(t *testing.T) {
         {"empty token", "", false},
         {"invalid chars", "abc!", false},
     }
-    
+
     for _, tt := range tests {
         tt := tt // Capture range variable
         t.Run(tt.name, func(t *testing.T) {
             t.Parallel() // Safe - independent sub-tests
-            
+
             result := ValidateToken(tt.token)
             assert.Equal(t, tt.valid, result)
         })
@@ -187,13 +188,13 @@ func TestTokenValidation(t *testing.T) {
 ```go
 func TestWithGlobalState(t *testing.T) {
     // DON'T use t.Parallel() here
-    
+
     originalValue := GlobalConfig.Timeout
     GlobalConfig.Timeout = 5 * time.Second
     defer func() {
         GlobalConfig.Timeout = originalValue
     }()
-    
+
     // Test that depends on global state
 }
 ```
@@ -201,6 +202,7 @@ func TestWithGlobalState(t *testing.T) {
 ### Performance Impact
 
 We observed **2-4x speed improvements** on multi-core systems:
+
 - 4 cores: Tests that took 800ms now complete in 200ms
 - CPU utilization increased from 25% to 200%+ (showing true parallel execution)
 
@@ -220,10 +222,10 @@ The most common source of flaky tests is arbitrary `time.Sleep()` calls waiting 
 ```go
 func TestAsyncOperation(t *testing.T) {
     go service.ProcessInBackground()
-    
+
     // Hope it's done by now? 🤞
     time.Sleep(200 * time.Millisecond)
-    
+
     result := service.GetResult()
     assert.Equal(t, expected, result)
 }
@@ -235,13 +237,13 @@ func TestAsyncOperation(t *testing.T) {
 func TestAsyncOperation(t *testing.T) {
     ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
     defer cancel()
-    
+
     resultChan := make(chan Result, 1)
     go func() {
         result := service.ProcessInBackground()
         resultChan <- result
     }()
-    
+
     select {
     case result := <-resultChan:
         assert.Equal(t, expected, result)
@@ -256,21 +258,21 @@ func TestAsyncOperation(t *testing.T) {
 ```go
 func TestAsyncStateChange(t *testing.T) {
     service.StartBackgroundTask()
-    
+
     waitForCondition(t, func() bool {
         return service.GetStatus() == "completed"
     }, 5*time.Second)
-    
+
     assert.Equal(t, "completed", service.GetStatus())
 }
 
 func waitForCondition(t *testing.T, check func() bool, timeout time.Duration) {
     ctx, cancel := context.WithTimeout(context.Background(), timeout)
     defer cancel()
-    
+
     ticker := time.NewTicker(10 * time.Millisecond)
     defer ticker.Stop()
-    
+
     for {
         select {
         case <-ticker.C:
@@ -296,15 +298,18 @@ func waitForCondition(t *testing.T, check func() bool, timeout time.Duration) {
 After implementing these improvements:
 
 ### Performance
+
 - **Unit test execution**: 60+ seconds → 0.8s seconds
 - **Parallel efficiency**: 25% CPU usage → 300%+ (4-core systems)
 - **Developer feedback loop**: Sub-second for TDD cycles
 
 ### Reliability
+
 - **Flaky test elimination**: Zero timing-related failures in 100+ CI runs
 - **Deterministic behavior**: Tests pass consistently regardless of system load
 
 ### Maintainability
+
 - **Code reduction**: Eliminated 500+ lines of duplicate test setup
 - **DRY compliance**: Single source of truth for test infrastructure
 - **Future-proofing**: New tests leverage existing patterns

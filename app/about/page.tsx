@@ -81,7 +81,7 @@ export default function Page() {
       icon: 'https://github.com/devicons/devicon/raw/refs/heads/master/icons/prometheus/prometheus-original.svg',
       link: 'https://prometheus.io',
     },
-  {
+    {
       name: 'tenderly',
       icon: 'https://github.com/devicons/devicon/raw/refs/heads/master/icons/prometheus/prometheus-original.svg',
       link: 'https://tenderly.co/',
@@ -101,7 +101,7 @@ export default function Page() {
       icon: 'https://github.com/devicons/devicon/raw/refs/heads/master/icons/postgresql/postgresql-original-wordmark.svg',
       link: 'https://www.postgresql.org/',
     },
-  {
+    {
       name: 'postman',
       icon: 'https://github.com/devicons/devicon/raw/refs/heads/master/icons/postman/postman-original.svg',
       link: 'https://www.postman.com/',

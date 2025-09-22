@@ -1,8 +1,8 @@
 ---
 title: Setting Up Local SSH Access on Arch Linux from a Mac
 draft: false
-date: "2025-02-11"
-summary: "This guide shows how to configure an Arch Linux machine for SSH access from a Mac using key-based authentication"
+date: '2025-02-11'
+summary: 'This guide shows how to configure an Arch Linux machine for SSH access from a Mac using key-based authentication'
 tags: [Linux]
 ---
 
@@ -70,9 +70,7 @@ ssh-keygen -t ed25519 -C "your_email@example.com"
 
 Accept the default file location and optionally add a passphrase.
 
-
 ### 4. Copy Your Public Key to the Arch Linux Machine
- 
 
 If available, use `ssh-copy-id` to copy your key:
 
@@ -90,7 +88,6 @@ cat ~/.ssh/id_ed25519.pub
 
 Then manually paste the key into the ~/.ssh/authorized_keys file on your Arch Linux machine.
 
-
 ### 5. Connect via SSH
 
 Use the local IP address of your Arch Linux machine to connect:
@@ -100,7 +97,6 @@ ssh username@local-ip-of-arch-linux
 ```
 
 Replace `username` and `local-ip-of-arch-linux` with your actual username and the machine's IP address.
-
 
 ### 6. Simplify the Login Process
 
@@ -127,7 +123,7 @@ HandleLidSwitchExternalPower=ignore
 HandleLidSwitch=ignore
 ```
 
-*Make sure the above options are set to `ignore` and un-commented.*
+_Make sure the above options are set to `ignore` and un-commented._
 
 Next, restart the logind service:
 
