@@ -2,6 +2,9 @@
   "name": "sheddy-xyz",
   "version": "2.0",
   "private": true,
+  "engines": {
+    "node": ">=18.17.0"
+  },
   "scripts": {
     "start": "next dev",
     "dev": "cross-env INIT_CWD=$PWD contentlayer dev & next dev",
@@ -20,7 +23,7 @@
     "@vercel/analytics": "^1.2.2",
     "algoliasearch": "^5.23.0",
     "autoprefixer": "^10.4.13",
-    "contentlayer": "v0.3.1",
+    "contentlayer": "latest",
     "esbuild": "0.18.11",
     "framer-motion": "^12.6.3",
     "github-slugger": "^2.0.0",
@@ -28,7 +31,7 @@
     "image-size": "1.0.0",
     "lucide-react": "^0.484.0",
     "next": "13.5.6",
-    "next-contentlayer": "v0.3.1",
+    "next-contentlayer": "latest",
     "next-themes": "^0.2.1",
     "pliny": "^0.4.1",
     "postcss": "^8.4.24",
