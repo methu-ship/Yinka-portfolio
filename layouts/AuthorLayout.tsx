@@ -34,25 +34,25 @@ export default function AuthorLayout({ children, content, toc }: Props) {
   return (
     <>
       {tocLinks.length > 0 && <FloatingTOC links={tocLinks} />}
-  <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-pink-50 dark:from-gray-950 dark:via-gray-900 dark:to-gray-950">
-    {/* Animated Bubbles */}
-    <div className="pointer-events-none absolute inset-0 -z-10">
-      {[...Array(30)].map((_, i) => (
-        <span
-          key={i}
-          className="absolute rounded-full bg-blue-200 opacity-30 dark:bg-blue-900 animate-bubble"
-          style={{
-            left: `${Math.random() * 100}%`,
-            top: `${Math.random() * 100}%`,
-            width: `${Math.random() * 40 + 20}px`,
-            height: `${Math.random() * 40 + 20}px`,
-            animationDelay: `${Math.random() * 4}s`,
-            animationDuration: `${Math.random() * 8 + 6}s`,
-          }}
-        />
-      ))}
-    </div>
-    {/* Hero Section */}
+      <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-pink-50 dark:from-gray-950 dark:via-gray-900 dark:to-gray-950">
+        {/* Animated Bubbles */}
+        <div className="pointer-events-none absolute inset-0 -z-10">
+          {[...Array(30)].map((_, i) => (
+            <span
+              key={i}
+              className="animate-bubble absolute rounded-full bg-blue-200 opacity-30 dark:bg-blue-900"
+              style={{
+                left: `${Math.random() * 100}%`,
+                top: `${Math.random() * 100}%`,
+                width: `${Math.random() * 40 + 20}px`,
+                height: `${Math.random() * 40 + 20}px`,
+                animationDelay: `${Math.random() * 4}s`,
+                animationDuration: `${Math.random() * 8 + 6}s`,
+              }}
+            />
+          ))}
+        </div>
+        {/* Hero Section */}
     <div className="relative overflow-hidden">
       <div className="absolute inset-0 bg-[radial-gradient(#e5e7eb_1px,transparent_1px)] opacity-50 [background-size:16px_16px] dark:bg-[radial-gradient(#1f2937_1px,transparent_1px)]" />
       <style jsx global>{`

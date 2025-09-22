@@ -104,8 +104,8 @@ export function ListLayoutWithTags({
           {title}
         </h1>
         <p className="text-lg leading-7 text-gray-500 dark:text-gray-400">
-          Exploring technical writing, Web3 best practices, and doing protocol level stuffs through detailed
-          guides and tutorials.
+          Exploring technical writing, Web3 best practices, and doing protocol level stuffs through
+          detailed guides and tutorials.
         </p>
       </div>
 
@@ -203,4 +203,4 @@ export function ListLayoutWithTags({
   )
 }
 
-export default ListLayoutWithTags;
+export default ListLayoutWithTags
