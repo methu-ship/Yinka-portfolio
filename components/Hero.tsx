@@ -179,13 +179,24 @@ const ModernHero = () => {
             <motion.h1 
               className="mb-6 text-5xl font-bold leading-tight tracking-tight md:text-7xl"
               animate={{ y: [0, -20, 0], scale: [1, 1.1, 1] }}
-              transition={{ duration: 1.2, repeat: Infinity, repeatType: 'loop', ease: 'easeInOut' }}
+              transition={{
+                duration: 1.2,
+                repeat: Infinity,
+                repeatType: 'loop',
+                ease: 'easeInOut',
+              }}
             >
               Hi, I'm{' '}
               <motion.span
-                className="bg-gradient-to-r from-pink-500 to-indigo-500 bg-clip-text text-transparent inline-block"
+                className="inline-block bg-gradient-to-r from-pink-500 to-indigo-500 bg-clip-text text-transparent"
                 animate={{ y: [0, -10, 0], scale: [1, 1.15, 1] }}
-                transition={{ duration: 1.2, repeat: Infinity, repeatType: 'loop', ease: 'easeInOut', delay: 0.2 }}
+                transition={{
+                  duration: 1.2,
+                  repeat: Infinity,
+                  repeatType: 'loop',
+                  ease: 'easeInOut',
+                  delay: 0.2,
+                }}
               >
                 <TypewriterText text="Yinka Habeeb" />
               </motion.span>
