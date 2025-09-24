@@ -3,7 +3,7 @@
   "version": "2.0",
   "private": true,
   "engines": {
-    "node": ">=20.0.0"
+    "node": ">=18.17.0"
   },
   "scripts": {
     "start": "next dev",
@@ -23,7 +23,7 @@
     "@vercel/analytics": "^1.2.2",
     "algoliasearch": "^5.23.0",
     "autoprefixer": "^10.4.13",
-    "contentlayer": "latest",
+    "contentlayer": "0.5.8",
     "esbuild": "0.18.11",
     "framer-motion": "^12.6.3",
     "github-slugger": "^2.0.0",
