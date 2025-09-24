@@ -1,1 +1,14 @@
-{"go":2,"concurrency":1,"cloud":1,"devops":1,"stylus":2,"blockchain":3,"linux":1,"networking":1,"solidity":1,"testing":1,"performance":1,"best-practices":1}
+{
+  "go": 2,
+  "concurrency": 1,
+  "cloud": 1,
+  "devops": 1,
+  "stylus": 2,
+  "blockchain": 3,
+  "linux": 1,
+  "networking": 1,
+  "solidity": 1,
+  "testing": 1,
+  "performance": 1,
+  "best-practices": 1
+}

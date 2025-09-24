@@ -104,8 +104,8 @@ export default function ListLayoutWithTags({
           {title}
         </h1>
         <p className="text-lg leading-7 text-gray-500 dark:text-gray-400">
-          Exploring technical writing, Web3 best practices, and doing protocol level stuffs through detailed
-          guides and tutorials.
+          Exploring technical writing, Web3 best practices, and doing protocol level stuffs through
+          detailed guides and tutorials.
         </p>
       </div>
 
@@ -175,7 +175,9 @@ export default function ListLayoutWithTags({
                         </time>
                       </div>
                       <div className="flex flex-wrap gap-2">
-                        {tags?.map((tag) => <Tag key={tag} text={tag} />)}
+                        {tags?.map((tag) => (
+                          <Tag key={tag} text={tag} />
+                        ))}
                       </div>
                     </div>
                     <p className="prose prose-sm max-w-none text-gray-500 dark:text-gray-400">
