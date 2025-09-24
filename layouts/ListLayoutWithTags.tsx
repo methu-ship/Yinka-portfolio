@@ -69,7 +69,7 @@ function Pagination({ totalPages, currentPage }: PaginationProps) {
   )
 }
 
-export function ListLayoutWithTags({
+export default function ListLayoutWithTags({
   posts,
   title,
   initialDisplayPosts = [],
@@ -104,8 +104,8 @@ export function ListLayoutWithTags({
           {title}
         </h1>
         <p className="text-lg leading-7 text-gray-500 dark:text-gray-400">
-          Exploring technical writing, Web3 best practices, and doing protocol level stuffs through
-          detailed guides and tutorials.
+          Exploring technical writing, Web3 best practices, and doing protocol level stuffs through detailed
+          guides and tutorials.
         </p>
       </div>
 
@@ -202,5 +202,3 @@ export function ListLayoutWithTags({
     </div>
   )
 }
-
-export default ListLayoutWithTags
