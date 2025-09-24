@@ -46,13 +46,17 @@ const computedFields: ComputedFields = {
 function createTagCount(allBlogs) {
   const tagCount: Record<string, number> = {}
   allBlogs.forEach((file) => {
-    if (file.tags && (!isProduction || file.draft !== true)) {
+    // Fix: Add proper validation for tags
+    if (file.tags && Array.isArray(file.tags) && (!isProduction || file.draft !== true)) {
       file.tags.forEach((tag) => {
-        const formattedTag = slug(tag)
-        if (formattedTag in tagCount) {
-          tagCount[formattedTag] += 1
-        } else {
-          tagCount[formattedTag] = 1
+        // Fix: Ensure tag is a string and not null/undefined
+        if (tag && typeof tag === 'string') {
+          const formattedTag = slug(tag)
+          if (formattedTag in tagCount) {
+            tagCount[formattedTag] += 1
+          } else {
+            tagCount[formattedTag] = 1
+          }
         }
       })
     }
@@ -135,7 +139,13 @@ export default makeSource({
     ],
   },
   onSuccess: async (importData) => {
-    const { allBlogs } = await importData()
-    createTagCount(allBlogs)
+    try {
+      const { allBlogs } = await importData()
+      createTagCount(allBlogs)
+    } catch (error) {
+      console.error('Error in onSuccess callback:', error)
+      // Create empty tag data file as fallback
+      writeFileSync('./app/tag-data.json', JSON.stringify({}))
+    }
   },
 })
