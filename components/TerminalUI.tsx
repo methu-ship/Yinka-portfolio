@@ -1,6 +1,6 @@
 'use client'
 
-import React, { useState, useEffect, useRef } from 'react'
+import React, { useState, useEffect, useRef, useCallback } from 'react'
 import { useRouter } from 'next/navigation'
 
 const commands = [
@@ -27,6 +27,15 @@ const TerminalUI: React.FC = () => {
   const inputRef = useRef<HTMLInputElement>(null)
   const mirrorRef = useRef<HTMLSpanElement>(null)
 
+  // Update custom cursor position using Canvas API (or mirror approach)
+  const updateCursorPos = useCallback(() => {
+    if (inputRef.current && mirrorRef.current) {
+      const pos = inputRef.current.selectionStart || 0
+      mirrorRef.current.textContent = input.substring(0, pos)
+      setCursorLeft(mirrorRef.current.offsetWidth + 6)
+    }
+  }, [input])
+
   useEffect(() => {
     if (isVisible) {
       inputRef.current?.focus()
@@ -43,16 +52,7 @@ const TerminalUI: React.FC = () => {
       setSuggestions(filtered)
     }
     updateCursorPos()
-  }, [input])
-
-  // Update custom cursor position using Canvas API (or mirror approach)
-  const updateCursorPos = () => {
-    if (inputRef.current && mirrorRef.current) {
-      const pos = inputRef.current.selectionStart || 0
-      mirrorRef.current.textContent = input.substring(0, pos)
-      setCursorLeft(mirrorRef.current.offsetWidth + 6)
-    }
-  }
+  }, [input, updateCursorPos])
 
   const handleCommand = (cmd: string) => {
     setHistory((prev) => [...prev, cmd])

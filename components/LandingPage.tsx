@@ -3,7 +3,6 @@
 import React from 'react'
 import Link from '@/components/Link'
 import Hero from '@/components/Hero'
-import { motion } from 'framer-motion'
 
 interface Post {
   slug: string
@@ -15,43 +14,20 @@ interface LandingPageProps {
   posts: Post[]
 }
 
-const fadeInUp = {
-  initial: { opacity: 0, y: 20 },
-  animate: { opacity: 1, y: 0 },
-  transition: { duration: 0.6 },
-}
-
-const stagger = {
-  animate: {
-    transition: {
-      staggerChildren: 0.1,
-    },
-  },
-}
-
 const LandingPage = ({ posts }: LandingPageProps) => {
   return (
     <div className="relative w-full">
       <Hero />
 
       {/* Articles Section */}
-      <motion.section
-        initial="initial"
-        whileInView="animate"
-        viewport={{ once: true }}
-        variants={stagger}
-        className="w-full px-4 py-20 sm:px-6 lg:px-8"
-      >
+      <section className="w-full px-4 py-20 sm:px-6 lg:px-8">
         <div className="mx-auto max-w-7xl">
-          <motion.h2
-            variants={fadeInUp}
-            className="mb-12 text-center text-3xl font-bold tracking-tight"
-          >
+          <h2 className="mb-12 text-center text-3xl font-bold tracking-tight">
             Latest Articles
-          </motion.h2>
+          </h2>
           <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
             {posts.slice(0, 5).map((post) => (
-              <motion.div key={post.slug} variants={fadeInUp} className="h-full">
+              <div key={post.slug} className="h-full">
                 <Link
                   href={`/blog/${post.slug}`}
                   className="block h-full transform transition-all duration-300 hover:-translate-y-1"
@@ -86,11 +62,11 @@ const LandingPage = ({ posts }: LandingPageProps) => {
                     </div>
                   </article>
                 </Link>
-              </motion.div>
+              </div>
             ))}
           </div>
 
-          <motion.div variants={fadeInUp} className="mt-12 text-center">
+          <div className="mt-12 text-center">
             <Link
               href="/blog"
               className="group relative inline-flex items-center justify-center overflow-hidden rounded-lg bg-gradient-to-br from-pink-500 to-indigo-500 p-0.5 text-sm font-medium text-gray-900 hover:text-white dark:text-white"
@@ -99,18 +75,12 @@ const LandingPage = ({ posts }: LandingPageProps) => {
                 View All Articles
               </span>
             </Link>
-          </motion.div>
+          </div>
         </div>
-      </motion.section>
+      </section>
 
       {/* Testimonial Section */}
-      <motion.section
-        initial="initial"
-        whileInView="animate"
-        viewport={{ once: true }}
-        variants={stagger}
-        className="relative w-full px-8 py-20 lg:px-12"
-      >
+      <section className="relative w-full px-8 py-20 lg:px-12">
         <div className="absolute inset-0 -z-10 bg-gradient-to-b from-gray-50 to-white dark:from-gray-800 dark:to-gray-900">
           {/* Decorative elements */}
           <div className="absolute left-1/4 top-1/4 h-32 w-32 rounded-full bg-pink-500/5" />
@@ -120,7 +90,7 @@ const LandingPage = ({ posts }: LandingPageProps) => {
 
         <div className="mx-auto max-w-4xl">
           {/* Quote icon */}
-          <motion.div variants={fadeInUp} className="mb-8 flex justify-center">
+          <div className="mb-8 flex justify-center">
             <div className="flex h-16 w-16 items-center justify-center rounded-full bg-gradient-to-br from-pink-500/10 to-indigo-500/10">
               <svg
                 className="h-8 w-8 text-pink-500 dark:text-pink-400"
@@ -130,17 +100,16 @@ const LandingPage = ({ posts }: LandingPageProps) => {
                 <path d="M14.017 21v-7.391c0-5.704 3.731-9.57 8.983-10.609l.995 2.151c-2.432.917-3.995 3.638-3.995 5.849h4v10h-9.983zm-14.017 0v-7.391c0-5.704 3.748-9.57 9-10.609l.996 2.151c-2.433.917-3.996 3.638-3.996 5.849h3.983v10h-9.983z" />
               </svg>
             </div>
-          </motion.div>
+          </div>
 
           <div className="relative">
             {/* Testimonial text */}
-            <motion.blockquote
-              variants={fadeInUp}
-              className="text-center text-2xl font-medium italic leading-relaxed text-gray-700 dark:text-gray-300"
-            />
+            <blockquote className="text-center text-2xl font-medium italic leading-relaxed text-gray-700 dark:text-gray-300">
+              "Building the future of blockchain technology, one line of code at a time."
+            </blockquote>
           </div>
         </div>
-      </motion.section>
+      </section>
     </div>
   )
 }

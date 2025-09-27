@@ -85,7 +85,6 @@ const GeometricShape = ({
 }
 
 const TypewriterText = ({ text, delay = 3 }: { text: string; delay?: number }) => {
-  const controls = useAnimation()
   const [displayText, setDisplayText] = useState('')
   const [currentIndex, setCurrentIndex] = useState(0)
 
@@ -171,52 +170,20 @@ const ModernHero = () => {
 
       <div className="relative z-10 flex min-h-[80vh] items-center justify-center px-4">
         <div className="text-center">
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.8 }}
-          >
-            <motion.h1
-              className="mb-6 text-5xl font-bold leading-tight tracking-tight md:text-7xl"
-              animate={{ y: [0, -20, 0], scale: [1, 1.1, 1] }}
-              transition={{
-                duration: 1.2,
-                repeat: Infinity,
-                repeatType: 'loop',
-                ease: 'easeInOut',
-              }}
-            >
+          <div>
+            <h1 className="mb-6 text-5xl font-bold leading-tight tracking-tight md:text-7xl">
               Hi, I'm{' '}
-              <motion.span
-                className="inline-block bg-gradient-to-r from-pink-500 to-indigo-500 bg-clip-text text-transparent"
-                animate={{ y: [0, -10, 0], scale: [1, 1.15, 1] }}
-                transition={{
-                  duration: 1.2,
-                  repeat: Infinity,
-                  repeatType: 'loop',
-                  ease: 'easeInOut',
-                  delay: 0.2,
-                }}
-              >
-                <TypewriterText text="Yinka Habeeb" />
-              </motion.span>
-            </motion.h1>
-          </motion.div>
+              <span className="inline-block bg-gradient-to-r from-pink-500 to-indigo-500 bg-clip-text text-transparent">
+                Yinka Habeeb
+              </span>
+            </h1>
+          </div>
 
-          <motion.p
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.8, delay: 0.2 }}
-            className="mb-8 text-xl text-gray-600 dark:text-gray-300 md:text-2xl"
-          >
-            <TypewriterText text="Blockchain Engineer | Technical Writer" delay={2} />
-          </motion.p>
+          <p className="mb-8 text-xl text-gray-600 dark:text-gray-300 md:text-2xl">
+            Blockchain Engineer | Technical Writer
+          </p>
 
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.8, delay: 0.4 }}
-          >
+          <div>
             <a
               href="/about"
               className="group relative inline-flex items-center justify-center overflow-hidden rounded-lg bg-gradient-to-br from-pink-500 to-indigo-500 p-0.5 text-sm font-medium text-gray-900 hover:text-white dark:text-white"
@@ -225,7 +192,7 @@ const ModernHero = () => {
                 Learn More About Me
               </span>
             </a>
-          </motion.div>
+          </div>
         </div>
       </div>
 
