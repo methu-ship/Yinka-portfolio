@@ -22,9 +22,7 @@ const LandingPage = ({ posts }: LandingPageProps) => {
       {/* Articles Section */}
       <section className="w-full px-4 py-20 sm:px-6 lg:px-8">
         <div className="mx-auto max-w-7xl">
-          <h2 className="mb-12 text-center text-3xl font-bold tracking-tight">
-            Latest Articles
-          </h2>
+          <h2 className="mb-12 text-center text-3xl font-bold tracking-tight">Latest Articles</h2>
           <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
             {posts.slice(0, 5).map((post) => (
               <div key={post.slug} className="h-full">
