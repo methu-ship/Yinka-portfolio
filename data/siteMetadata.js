@@ -10,10 +10,9 @@ const siteMetadata = {
   siteRepo: 'https://github.com/hacktivist123/sheddy-xyz-new',
   siteLogo: '/static/images/logo.png',
   socialBanner: '/static/images/social-card.png',
-  github: 'https://github.com/hacktivist123',
-  twitter: 'https://twitter.com/coder_blvck',
-  youtube: 'https://www.youtube.com/channel/UCUnHbLI4hUJzmCEw_66YaFg',
-  linkedin: 'https://www.linkedin.com/in/shedrackakintayo',
+  github: 'https://github.com/methu-ship',
+  twitter: 'https://x.com/yinkaabeeb',
+  linkedin: 'https://www.linkedin.com/in/habeeb-yinka/',
   locale: 'en-US',
   comments: {
     // If you want to use an analytics provider you have to add it to the
