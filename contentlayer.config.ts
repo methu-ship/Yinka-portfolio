@@ -3,6 +3,7 @@ import { writeFileSync } from 'fs'
 import readingTime from 'reading-time'
 import { slug } from 'github-slugger'
 import path from 'path'
+import { glob } from 'glob'
 // Remark packages
 import remarkMath from 'remark-math'
 import {
@@ -38,6 +39,29 @@ const computedFields: ComputedFields = {
     resolve: (doc) => doc._raw.sourceFilePath,
   },
   toc: { type: 'json', resolve: (doc) => extractTocHeadings(doc.body.raw) },
+}
+
+async function fixGeneratedJsonImportAssertions() {
+  // Convert deprecated `assert { type: 'json' }` to `with { type: 'json' }`
+  try {
+    const generatedFiles = await glob('.contentlayer/generated/**/*.mjs', {
+      dot: true,
+      cwd: root,
+      absolute: true,
+    })
+
+    for (const filePath of generatedFiles) {
+      try {
+        const original = await (await import('fs/promises')).readFile(filePath, 'utf8')
+        const replaced = original
+          .replaceAll(" assert { type: 'json' }", " with { type: 'json' }")
+          .replaceAll(' assert { type: "json" }', ' with { type: "json" }')
+        if (replaced !== original) {
+          await (await import('fs/promises')).writeFile(filePath, replaced, 'utf8')
+        }
+      } catch {}
+    }
+  } catch {}
 }
 
 /**
@@ -140,6 +164,8 @@ export default makeSource({
   },
   onSuccess: async (importData) => {
     try {
+      // Ensure generated files are compatible with Node 22 JSON module syntax
+      await fixGeneratedJsonImportAssertions()
       const { allBlogs } = await importData()
       createTagCount(allBlogs)
     } catch (error) {
